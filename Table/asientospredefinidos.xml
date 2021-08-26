@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<table>
+    <column>
+        <name>idasientopredefinido</name>
+        <type>serial</type>
+    </column>
+    <column>
+        <name>descripcion</name>
+        <type>character varying(150)</type>
+    </column>
+    
+    
+    <constraint>
+        <name>asientospredefinidos_pkey</name>
+        <type>PRIMARY KEY (idasientopredefinido)</type>
+    </constraint>
+    
+    
+    <constraint>
+        <name>uniq_asientospredefinidos__descripcion</name>
+        <type>UNIQUE (descripcion)</type>
+    </constraint>
+</table>
