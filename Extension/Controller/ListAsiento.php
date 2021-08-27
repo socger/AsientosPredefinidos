@@ -1,9 +1,9 @@
 <?php
 namespace FacturaScripts\Plugins\AsientosPredefinidos\Extension\Controller;
 
-//use FacturaScripts\Core\Lib\ExtendedController\ListController;
+use FacturaScripts\Core\Base\DataBase\DataBaseWhere;
 
-class ListAsiento /*extends ListController*/
+class ListAsiento
 {
     // createViews() se ejecuta una vez realiado el createViews() del controlador.
     public function createViews() {
@@ -25,18 +25,14 @@ class ListAsiento /*extends ListController*/
 
             // Esto es un ejemplo ... debe de cambiarlo según los nombres de campos del modelo
             $this->addSearchFields($viewName, ["idasientopredefinido", "descripcion"]);
-            
 
-            // $this->addListView('List' . $model, $model, 'Asientos predefinidos', 'fas fa-cogs');    
+            /// Filters
+            $this->addFilterSelectWhere($viewName, 'status', [
+                ['label' => $this->toolBox()->i18n()->trans('only-active'), 'where' => [new DataBaseWhere('debaja', false)]],
+                ['label' => $this->toolBox()->i18n()->trans('only-suspended'), 'where' => [new DataBaseWhere('debaja', true)]],
+                ['label' => $this->toolBox()->i18n()->trans('all'), 'where' => []]
+            ]);
 
-    /*        
-            $this->addOrderBy($viewName, ["idasientopredefinido"], "Id");
-            $this->addOrderBy($viewName, ["descripcion"], "Descripción", 1);
-
-            // Esto es un ejemplo ... debe de cambiarlo según los nombres de campos del modelo
-            $this->addSearchFields($viewName, ["idasientopredefinido", "descripcion"]);
-     * 
-     */
         };
     }
     
