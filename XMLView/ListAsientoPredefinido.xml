@@ -2,44 +2,10 @@
 <view>
     <columns>
         <column name="code" order="100">
-            <widget type="text" fieldname="idasientopredefinido"  onclick="EditAsientoPredefinido"/>
+            <widget type="text" fieldname="id"/>
         </column>
         <column name="description" order="110">
             <widget type="text" fieldname="descripcion" />
         </column>
-        <column name="blocked" display="none" order="120">
-            <widget type="checkbox" fieldname="debaja" />
-        </column>
     </columns>
-    
-    
-    <modals>
-        <group name="gen-accounting" title="generate-accounting-entry" icon="fas fa-magic">
-            <column name="accounting-entry-date" order="100">
-                <widget type="date" fieldname="date" />
-            </column>
-            <column name="company" numcolumns="12" order="120">
-                <widget type="select" fieldname="idempresa" required="true">
-                    <values source="empresas" fieldcode="idempresa" fieldtitle="nombrecorto" />
-                </widget>
-            </column>
-            <column name="exercise" numcolumns="12" order="130">
-                <widget type="select" fieldname="codejercicio" required="true">
-                    <values source="ejercicios" fieldcode="codejercicio" fieldtitle="nombre" />
-                </widget>
-            </column>
-            <column name="predefined-accounting" numcolumns="12" order="130">
-                <widget type="select" fieldname="idasientopredefinido" required="true">
-                    <values source="asientospredefinidos" fieldcode="idasientopredefinido" fieldtitle="descripcion" />
-                </widget>
-            </column>
-        </group>
-    </modals>
-    
-    <rows>
-        <row type="status">
-            <option fieldname="debaja" title="suspended" color="danger">1</option>
-        </row>
-    </rows>
-    
 </view>
