@@ -11,7 +11,7 @@ class ListAsiento
             $this->createAsientosPredefinidos();
         };
     }
-    
+
     protected function createAsientosPredefinidos()
     {
         return function(string $model = 'AsientoPredefinido') {
@@ -33,9 +33,38 @@ class ListAsiento
                 ['label' => $this->toolBox()->i18n()->trans('all'), 'where' => []]
             ]);
 
+            $this->addButton($viewName, [
+                'action' => 'gen-accounting',
+                'icon' => 'fas fa-magic',
+                'label' => 'generate-accounting-entry',
+                'type' => 'modal'
+            ]);
+
         };
     }
     
+    // execPreviousAction() se ejecuta después del execPreviousAction() del controlador. Si devolvemos false detenemos la ejecución del controlador.
+    public function execPreviousAction() {
+        return function($action) {
+            if ($action === 'gen-accounting') {
+                $this->generateAccounting();
+            }
+
+        };
+    }
+
+    protected function generateAccounting()
+    {
+        return function() {
+            $date = $this->request->request->get('date', '');
+            $idempresa = $this->request->request->get('idempresa');
+            $codejercicio = $this->request->request->get('codejercicio');
+            $idasientopredefinido = $this->request->request->get('idasientopredefinido');
+
+            $this->toolBox()->i18nLog()->info('Hay que generar el asiento .... TODAVIA SIN HACER');
+        };
+    }
+
 
 /*
 
@@ -43,13 +72,6 @@ class ListAsiento
     
     // execAfterAction() se ejecuta tras el execAfterAction() del controlador.
     public function execAfterAction() {
-       return function($action) {
-          /// tu código aquí
-       };
-    }
-
-    // execPreviousAction() se ejecuta después del execPreviousAction() del controlador. Si devolvemos false detenemos la ejecución del controlador.
-    public function execPreviousAction() {
        return function($action) {
           /// tu código aquí
        };
