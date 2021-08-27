@@ -1,40 +1,77 @@
 <?php
+
 namespace FacturaScripts\Plugins\AsientosPredefinidos\Model;
 
-class AsientoPredefinido extends \FacturaScripts\Core\Model\Base\ModelClass
-{
+use FacturaScripts\Core\Base\DataBase\DataBaseWhere;
+use FacturaScripts\Dinamic\Model\Asiento;
+
+class AsientoPredefinido extends \FacturaScripts\Core\Model\Base\ModelClass {
+
     use \FacturaScripts\Core\Model\Base\ModelTrait;
 
-    public $idasientopredefinido;
+    /**
+     * 
+     * @var string
+     */
     public $descripcion;
-    public $debaja;
-    public $fechabaja;
-    
+
+    /**
+     * 
+     * @var int
+     */
+    public $id;
 
     public function clear() {
         parent::clear();
     }
 
+    public function getLines() {
+        $line = new AsientoPredefinidoLinea();
+        $where = [new DataBaseWhere("idasientopre", $this->id)];
+
+        return $line->all($where);
+    }
+
+    public function generate(string $date, int $idempresa): Asiento {
+        $asiento = new Asiento();
+        $asiento->idempresa = $idempresa;
+        $asiento->setDate($date);
+        $asiento->concepto = $this->descripcion;
+        
+        if (false === $asiento->save()) {
+            return $asiento;
+        }
+        
+        foreach ($this->getLines() as $line) {
+            $newLine = $asiento->getNewLine();
+            $newLine->codsubcuenta = $line->codsubcuenta;
+            $newLine->codcontrapartida = $line->codcontrapartida;
+            $newLine->concepto = $line->concepto;
+
+            if (false === $newLine->save()) {
+                $asiento->delete(); // Si no se graba, pues borra la cabecera del asiento
+                return $asiento;
+            }
+        }
+
+        return $asiento;
+    }
+
     public static function primaryColumn() {
-        return "idasientopredefinido";
+        return "id";
     }
 
     public static function tableName() {
-        return "asientospredefinidos";
+        return "asientospre";
     }
-    
-    public function test() {
 
-        $this->debaja = !empty($this->fechabaja);
-        
-        $this->evitarInyeccionSQL();
+    public function test() {
+        $this->descripcion = $this->toolBox()->utils()->noHtml($this->descripcion);
         return parent::test();
     }
-	
-    private function evitarInyeccionSQL()
-    {
-        $utils = $this->toolBox()->utils();
-        $this->descripcion = $utils->noHtml($this->descripcion);
+
+    public function url(string $type = 'auto', string $list = 'ListAsiento?activetab=List'): string {
+        return parent::url($type, $list);
     }
-    
+
 }
