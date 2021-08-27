@@ -6,8 +6,10 @@ class AsientoPredefinido extends \FacturaScripts\Core\Model\Base\ModelClass
     use \FacturaScripts\Core\Model\Base\ModelTrait;
 
     public $idasientopredefinido;
-
     public $descripcion;
+    public $debaja;
+    public $fechabaja;
+    
 
     public function clear() {
         parent::clear();
@@ -23,6 +25,8 @@ class AsientoPredefinido extends \FacturaScripts\Core\Model\Base\ModelClass
     
     public function test() {
 
+        $this->debaja = !empty($this->fechabaja);
+        
         $this->evitarInyeccionSQL();
         return parent::test();
     }
