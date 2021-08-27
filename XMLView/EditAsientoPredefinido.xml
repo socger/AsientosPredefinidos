@@ -9,6 +9,9 @@
             <column name="description" numcolumns="9" order="110">
                 <widget type="text" fieldname="descripcion" maxlength="150" required="true"/>
             </column>
+            <column name="date-of-suspension" numcolumns="3" order="130">
+                <widget type="date" fieldname="fechabaja" />
+            </column>
         </group>
     </columns>
 </view>
