@@ -5,15 +5,52 @@ class AsientoPredefinidoLinea extends \FacturaScripts\Core\Model\Base\ModelClass
 {
     use \FacturaScripts\Core\Model\Base\ModelTrait;
 
-    public $idasientopredefinidolinea;
-    public $idasientopredefinido;
+    /**
+     * 
+     * @var string 
+     */
     public $codsubcuenta;
-    public $idsubcuenta;
+    
+    /**
+     * 
+     * @var string 
+     */
     public $codcontrapartida;
-    public $idcontrapartida;
+
+    /**
+     * 
+     * @var string 
+     */
     public $concepto;
+
+    /**
+     * 
+     * @var float
+     */
     public $debe;
+    
+    /**
+     * 
+     * @var float
+     */
     public $haber;
+
+    /**
+     * 
+     * @var int
+     */
+    public $id;
+
+    /**
+     * 
+     * @var int
+     */
+    public $idasientopre;
+
+    /**
+     * 
+     * @var int
+     */
     public $orden;
 
     public function clear() {
@@ -25,107 +62,17 @@ class AsientoPredefinidoLinea extends \FacturaScripts\Core\Model\Base\ModelClass
     }
 
     public static function primaryColumn() {
-        return "idasientopredefinidolinea";
+        return "id";
     }
 
     public static function tableName() {
-        return "asientospredefinidoslineas";
+        return "asientospre_lineas";
     }
     
     public function test() {
-        if ($this->comprobarSubcuenta() === false){
-            return false;
-        }
-        
-        if ($this->comprobarContrapartida() === false){
-            return false;
-        }
-        
-        $this->comprobarOrden();
-        
-        $this->evitarInyeccionSQL();
+        $this->concepto = $this->toolBox()->utils()->noHtml($this->concepto);
         return parent::test();
     }
 	
-    private function evitarInyeccionSQL()
-    {
-        $utils = $this->toolBox()->utils();
-        $this->concepto = $utils->noHtml($this->concepto);
-    }
-    
-    private function comprobarSubcuenta() : bool
-    {
-        $aDevolver = true;
-        
-        // Comprobamos si la cuenta existe
-        $sql = ' SELECT subcuentas.idsubcuenta '
-             . ' FROM subcuentas '
-             . ' WHERE subcuentas.codsubcuenta = "' . $this->codsubcuenta . '" '
-             . ' ORDER BY subcuentas.codsubcuenta '
-             ;
-
-        $registros = self::$dataBase->select($sql); // Para entender su funcionamiento visitar ... https://facturascripts.com/publicaciones/acceso-a-la-base-de-datos-818
-
-        foreach ($registros as $fila) {
-            if (empty($fila['idsubcuenta'])) {
-                $aDevolver = false;
-                $this->toolBox()->i18nLog()->error( "La subcuenta no existe." );
-            } else {
-                $this->idsubcuenta = $fila['idsubcuenta'];
-            }
-        }
-        
-        return $aDevolver;
-    }
-    
-    private function comprobarContrapartida() : bool
-    {
-        $aDevolver = true;
-        
-        // Comprobamos si la cuenta existe
-        $sql = ' SELECT subcuentas.idsubcuenta '
-             . ' FROM subcuentas '
-             . ' WHERE subcuentas.codsubcuenta = "' . $this->codcontrapartida . '" '
-             . ' ORDER BY subcuentas.codsubcuenta '
-             ;
-
-        $registros = self::$dataBase->select($sql); // Para entender su funcionamiento visitar ... https://facturascripts.com/publicaciones/acceso-a-la-base-de-datos-818
-
-        foreach ($registros as $fila) {
-            if (empty($fila['idsubcuenta'])) {
-                $aDevolver = false;
-                $this->toolBox()->i18nLog()->error( "La subcuenta no existe." );
-            } else {
-                $this->idcontrapartida = $fila['idsubcuenta'];
-            }
-        }
-        
-        return $aDevolver;
-    }
-    
-    private function comprobarOrden()
-    {
-        if (empty($this->orden) or $this->orden === 0) {
-            // Comprobamos si la cuenta existe
-            $sql = ' SELECT MAX(asientospredefinidoslineas.orden) AS orden '
-                 . ' FROM asientospredefinidoslineas '
-                 . ' WHERE asientospredefinidoslineas.idasientopredefinido = ' . $this->idasientopredefinido
-                 . ' ORDER BY asientospredefinidoslineas.idasientopredefinido '
-                 .        ' , asientospredefinidoslineas.orden '
-                 ;
-
-            $registros = self::$dataBase->select($sql); // Para entender su funcionamiento visitar ... https://facturascripts.com/publicaciones/acceso-a-la-base-de-datos-818
-
-            foreach ($registros as $fila) {
-                if (empty($fila['orden'])) {
-                    $this->orden = 1;
-                } else {
-                    $this->orden = ($fila['orden'] + 5);
-                }
-            }
-
-        }
-    }
-    
     
 }
