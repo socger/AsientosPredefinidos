@@ -19,78 +19,74 @@
 
 namespace FacturaScripts\Plugins\AsientosPredefinidos\Model;
 
-class AsientoPredefinidoLinea extends \FacturaScripts\Core\Model\Base\ModelClass
+use FacturaScripts\Core\Model\Base\ModelClass;
+use FacturaScripts\Core\Model\Base\ModelTrait;
+
+class AsientoPredefinidoLinea extends ModelClass
 {
-    use \FacturaScripts\Core\Model\Base\ModelTrait;
+    use ModelTrait;
 
     /**
-     * 
-     * @var string 
+     * @var string
      */
     public $codsubcuenta;
-    
+
     /**
-     * 
-     * @var string 
+     * @var string
      */
     public $codcontrapartida;
 
     /**
-     * 
-     * @var string 
+     * @var string
      */
     public $concepto;
 
     /**
-     * 
      * @var float
      */
     public $debe;
-    
+
     /**
-     * 
      * @var float
      */
     public $haber;
 
     /**
-     * 
      * @var int
      */
     public $id;
 
     /**
-     * 
      * @var int
      */
     public $idasientopre;
 
     /**
-     * 
      * @var int
      */
     public $orden;
 
-    public function clear() {
+    public function clear()
+    {
         parent::clear();
-        
-        $this->debe = 0;
-        $this->haber = 0;
-        $this->orden = 0;
+        $this->debe = 0.0;
+        $this->haber = 0.0;
+        $this->orden = 0.0;
     }
 
-    public static function primaryColumn() {
+    public static function primaryColumn()
+    {
         return "id";
     }
 
-    public static function tableName() {
+    public static function tableName()
+    {
         return "asientospre_lineas";
     }
-    
-    public function test() {
+
+    public function test()
+    {
         $this->concepto = $this->toolBox()->utils()->noHtml($this->concepto);
         return parent::test();
     }
-	
-    
 }
