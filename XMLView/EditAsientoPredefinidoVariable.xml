@@ -1,13 +1,25 @@
-hay que arreglar esto jerofa
-
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-To change this license header, choose License Headers in Project Properties.
-To change this template file, choose Tools | Templates
-and open the template in the editor.
--->
-
-
-<root>
-    
-</root>
+<view>
+    <columns>
+        <group name="no-visible" numcolumns="12">
+            <column name="idasientopre" display="none" order="100">
+                <widget type="text" fieldname="idasientopre" readonly="true"/>
+            </column>
+        </group>
+        
+        <group name="data" numcolumns="12">
+            <column name="code" numcolumns="1" order="100">
+                <widget type="text" fieldname="codigo" maxlength="1" required="true"/>
+            </column>
+            <column name="Tipo" numcolumns="3" order="110">
+                <widget type="select" fieldname="tipo" required="true">
+                    <values title="Subcuenta">S</values>
+                    <values title="Numérico">N</values>
+                </widget>
+            </column>
+            <column name="Mensaje" numcolumns="8" order="130">
+                <widget type="text" fieldname="mensaje" maxlength="255" required="true" />
+            </column>
+        </group>
+    </columns>
+</view>
