@@ -12,11 +12,11 @@
                     <values source="subcuentas" fieldcode="codsubcuenta" fieldtitle="descripcion" />
                 </widget>
             </column>
-            <column name="counterpart" display="none" numcolumns="3" order="110">
+<!--            <column name="counterpart" display="none" numcolumns="3" order="110">
                 <widget type="autocomplete" fieldname="codcontrapartida" icon="fas fa-th-list" onclick="EditSubcuenta">
                     <values source="subcuentas" fieldcode="codsubcuenta" fieldtitle="descripcion" />
                 </widget>
-            </column>
+            </column>-->
             <column name="description" order="120">
                 <widget type="text" fieldname="concepto" maxlength="255" required="true"/>
             </column>
