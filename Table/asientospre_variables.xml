@@ -62,7 +62,7 @@
 
 
     <constraint>
-        <name>uniq_asientospre_variables__idpreasiento_codigoVariable</name>
-        <type>UNIQUE (idpreasiento, codigoVariable)</type>
+        <name>uniq_asientospre_variables__idasientopre_codigo</name>
+        <type>UNIQUE (idasientopre, codigo)</type>
     </constraint>
 </table>
