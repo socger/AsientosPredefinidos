@@ -70,8 +70,8 @@ class AsientoPredefinidoLinea extends ModelClass
     public function clear()
     {
         parent::clear();
-        $this->debe = '0';
-        $this->haber = '0';
+        // $this->debe = '0';
+        // $this->haber = '0';
         $this->orden = 0;
     }
 
