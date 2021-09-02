@@ -8,6 +8,10 @@
         <name>descripcion</name>
         <type>character varying(150)</type>
     </column>
+    <column>
+        <name>concepto</name>
+        <type>character varying(255)</type>
+    </column>
     
     
     <constraint>
