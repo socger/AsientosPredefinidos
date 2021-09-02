@@ -57,10 +57,11 @@ class AsientoPredefinido extends ModelClass
         foreach ($this->getLines() as $line) {
             $newLine = $asiento->getNewLine();
             $newLine->codsubcuenta = $line->codsubcuenta;
-            $newLine->codcontrapartida = $line->codcontrapartida;
+            // $newLine->codcontrapartida = $line->codcontrapartida; // Los asientos predefinidos no van a tener contrapartida
             $newLine->concepto = $line->concepto;
             $newLine->debe = $line->debe;
             $newLine->haber = $line->haber;
+            
             if (false === $newLine->save()) {
                 $asiento->delete(); // Si no se graba, pues borra la cabecera del asiento
                 return $asiento;
