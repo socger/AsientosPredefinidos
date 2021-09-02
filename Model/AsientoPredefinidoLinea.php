@@ -31,23 +31,24 @@ class AsientoPredefinidoLinea extends ModelClass
      */
     public $codsubcuenta;
 
-    /**
-     * @var string
-     */
-    public $codcontrapartida;
-
+//    /**
+//     * @var string
+//     */
+//    public $codcontrapartida;
+//
+    
     /**
      * @var string
      */
     public $concepto;
 
     /**
-     * @var float
+     * @var string
      */
     public $debe;
 
     /**
-     * @var float
+     * @var string
      */
     public $haber;
 
@@ -69,9 +70,9 @@ class AsientoPredefinidoLinea extends ModelClass
     public function clear()
     {
         parent::clear();
-        $this->debe = 0.0;
-        $this->haber = 0.0;
-        $this->orden = 0.0;
+        $this->debe = '0';
+        $this->haber = '0';
+        $this->orden = 0;
     }
 
     public static function primaryColumn()
@@ -86,7 +87,12 @@ class AsientoPredefinidoLinea extends ModelClass
 
     public function test()
     {
-        $this->concepto = $this->toolBox()->utils()->noHtml($this->concepto);
+        $utils = $this->toolBox()->utils();
+        $this->codsubcuenta = $utils->noHtml($this->codsubcuenta);
+        $this->concepto = $utils->noHtml($this->concepto);
+        $this->debe = $this->toolBox()->utils()->noHtml($this->debe);
+        $this->haber = $this->toolBox()->utils()->noHtml($this->haber);
+        
         return parent::test();
     }
 }
