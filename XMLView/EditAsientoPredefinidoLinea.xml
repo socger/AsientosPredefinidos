@@ -21,10 +21,10 @@
                 <widget type="text" fieldname="concepto" maxlength="255" required="true"/>
             </column>
             <column name="debit" numcolumns="2" order="130">
-                <widget type="money" fieldname="debe"/>
+                <widget type="text" fieldname="debe"/>
             </column>
             <column name="credit" numcolumns="2" order="140">
-                <widget type="money" fieldname="haber"/>
+                <widget type="text" fieldname="haber"/>
             </column>
             <column name="sort" numcolumns="2" order="150">
                 <widget type="number" decimal="0" min="0" max="999" step="5" fieldname="orden" />
