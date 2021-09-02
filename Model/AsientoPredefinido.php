@@ -32,6 +32,11 @@ class AsientoPredefinido extends ModelClass
     /**
      * @var string
      */
+    public $concepto;
+
+    /**
+     * @var string
+     */
     public $descripcion;
 
     /**
@@ -44,7 +49,7 @@ class AsientoPredefinido extends ModelClass
         $asiento = new Asiento();
         $asiento->idempresa = $idempresa;
         $asiento->setDate($date);
-        $asiento->concepto = $this->descripcion;
+        $asiento->concepto = $this->concepto;
         if (false === $asiento->save()) {
             return $asiento;
         }
@@ -84,7 +89,10 @@ class AsientoPredefinido extends ModelClass
 
     public function test()
     {
-        $this->descripcion = $this->toolBox()->utils()->noHtml($this->descripcion);
+        $utils = $this->toolBox()->utils();
+        $this->concepto = $utils->noHtml($this->concepto);
+        $this->descripcion = $utils->noHtml($this->descripcion);
+
         return parent::test();
     }
 
