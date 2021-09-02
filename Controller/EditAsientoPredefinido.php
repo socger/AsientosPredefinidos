@@ -57,10 +57,10 @@ class EditAsientoPredefinido extends EditController
 
     protected function createViewsVariables(string $viewName = 'EditAsientoPredefinidoVariable')
     {
-        $this->addEditListView($viewName, 'AsientoPredefinidoVariables', 'Variables');
+        $this->addEditListView($viewName, 'AsientoPredefinidoVariable', 'Variables');
         $this->views[$viewName]->setInLine(true);
     }
-
+    
     protected function execAfterAction($action)
     {
         if ($action === 'gen-accounting') {
@@ -97,7 +97,14 @@ class EditAsientoPredefinido extends EditController
                 $where = [new DataBaseWhere('idasientopre', $idasientopre)];
                 $view->loadData('', $where, ['orden' => 'ASC', 'idasientopre' => 'ASC']);
                 break;
-
+            
+            case 'EditAsientoPredefinidoVariable':
+                $idasientopre = $this->getViewModelValue($this->getMainViewName(), 'id');
+                $where = [new DataBaseWhere('idasientopre', $idasientopre)];
+                $view->loadData('', $where, ['idasientopre' => 'ASC', 'codigo' => 'ASC']);
+                
+                break;
+            
             default:
                 parent::loadData($viewName, $view);
 
