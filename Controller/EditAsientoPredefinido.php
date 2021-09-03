@@ -86,21 +86,24 @@ class EditAsientoPredefinido extends EditController
 
     protected function generateAccountingAction()
     {
-        $form = $this->request->request->all();
+        $form = $this->request->request->all(); // Nos traemos todos los campos del form de la vista AsientoPredefinidoGenerar.html.twig
         
         if ( empty($form["fecha"]) || empty($form["idempresa"]) ) {
             $this->toolBox()->i18nLog()->error('No ha introducido ni la empresa, ni la fecha');
             return;
         }
 
-        $asiento = $this->getModel()->generate($form);
+        $asiento = $this->getModel()->generate($form); // Llamamos al método generate() del modelo AsientoPredefinido.php, pero le pasamos todo el contenido del form
         
         if ($asiento->exists()) {
+            // Se ha creado el siento, así que sacamos mensaje, esperamos un segundo y saltamos a la dirección del asiento recién creado.
             $this->toolBox()->i18nLog()->info('generated-accounting-entries', ['%quantity%' => 1]);
             $this->redirect($asiento->url(), 1); // El parámetro 1 es un temporizador en redireccionar, así el usuario ve el mensaje de la línea anterior
+
             return;
         }
 
+        // Presentamos un error por no haberse creado el asiento
         $this->toolBox()->i18nLog()->warning('record-save-error');
     }
 
