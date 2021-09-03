@@ -43,18 +43,41 @@ class AsientoPredefinido extends ModelClass
      * @var int
      */
     public $id;
+    
 
-    public function generate(string $date, int $idempresa): Asiento
+    public function getVariables(): array
     {
+        $variable = new AsientoPredefinidoVariable();
+        $where = [new DataBaseWhere("idasientopre", $this->id)];
+        return $variable->all($where);
+    }
+
+
+    public function generate(array $form): Asiento
+    {
+        return $asiento;
+        
         $asiento = new Asiento();
-        $asiento->idempresa = $idempresa;
-        $asiento->setDate($date);
+
+        $asiento->idempresa = $form["idempresa"];
+        $asiento->setDate($form["fecha"]);
+        
         $asiento->concepto = $this->concepto;
+        
+        return $asiento;
+        
+/*        
         if (false === $asiento->save()) {
             return $asiento;
         }
 
+        recorrer las líneas y buscar por cada variable el valor
+        crear array de valores de líneas
+        
         foreach ($this->getLines() as $line) {
+            
+            // jerofa ... consultar el valor de la variable que tuviera o la subcuenta o el debe/haber para añadirselo o calcular
+            
             $newLine = $asiento->getNewLine();
             $newLine->codsubcuenta = $line->codsubcuenta;
             // $newLine->codcontrapartida = $line->codcontrapartida; // Los asientos predefinidos no van a tener contrapartida
@@ -69,6 +92,7 @@ class AsientoPredefinido extends ModelClass
         }
 
         return $asiento;
+*/
     }
 
     public function getLines(): array
