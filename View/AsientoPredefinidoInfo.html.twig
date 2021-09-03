@@ -1,69 +1,58 @@
-{% extends "Master/MicroTemplate.html.twig" %}
-
-{% block body %}
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-12">
-                <br/><br/>
-                <div class="jumbotron">
+    <div class="card shadow p-3">
 {#                    
-                    <h1>
-                        <i class="fas fa-bug" aria-hidden="true"></i> {{ i18n.trans('template-error') }}:
-                    </h1>
-                    
-                    <hr class="my-4">
+        <h1>
+            <i class="fas fa-bug" aria-hidden="true"></i> {{ i18n.trans('template-error') }}:
+        </h1>
 
-                    <p>{{ i18n.trans('template') }}: {{ template }}</p>
-                    <p>{{ i18n.trans('controller') }}: {{ controllerName }}</p>
-                    
+        <hr class="my-4">
+
+        <p>{{ i18n.trans('template') }}: {{ template }}</p>
+        <p>{{ i18n.trans('controller') }}: {{ controllerName }}</p>
+
 #}                    
 
-                    <p>
-                        Una vez creada la cabecera del Asiento Predefinido con el que vamos a trabajar, se activarán las pestañas de Ayuda, Líneas, Variables y Generar.
+        <p>
+            Una vez creada la cabecera del Asiento Predefinido con el que vamos a trabajar, se activarán las pestañas de Ayuda, Líneas, Variables y Generar.
 
-                        <br><br>La pestaña de Líneas nos sirve para preestablecer las partidas/subcuentas o registros que generarán el asiento.
-                        <br>Para ello y por cada línea a crear/modificar nos pedirá FacturaScripts los siguientes datos:
+            <br><br>La pestaña de Líneas nos sirve para preestablecer las partidas/subcuentas o registros que generarán el asiento.
+            <br>Para ello y por cada línea a crear/modificar nos pedirá FacturaScripts los siguientes datos:
 
-                        <br><br><b>Subcuenta.-</b> Será para introducir la subcuenta con la que generaremos la línea del asiento. 
-                        <br>Evidentemente antes tiene que estar creada la subcuenta en el Plan de Cuentas de FacturaScripts. Pero también podemos crear variables dentro del contenido de la subcuenta.
+            <br><br><b>Subcuenta.-</b> Será para introducir la subcuenta con la que generaremos la línea del asiento. 
+            <br>Evidentemente antes tiene que estar creada la subcuenta en el Plan de Cuentas de FacturaScripts. Pero también podemos crear variables dentro del contenido de la subcuenta.
 
-                        <br><br>Si vamos a crear variables, dentro del contenido de una subcuenta, primero tenemos que tener en cuenta la cantidad total de dígitos/caracteres con los que hemos configurado a FacturaScripts para la subcuentas de nuestro ejercicio contable en curso. No podemos crear una subcuenta con más dígitos de los configurados.
+            <br><br>Si vamos a crear variables, dentro del contenido de una subcuenta, primero tenemos que tener en cuenta la cantidad total de dígitos/caracteres con los que hemos configurado a FacturaScripts para la subcuentas de nuestro ejercicio contable en curso. No podemos crear una subcuenta con más dígitos de los configurados.
 
-                        <br><br>Para ver cual es la cantidad de dígitos por subcuenta nos iríamos al menú de Contabilidad > Ejercicios y pincharíamos sobre el ejercicio en el que estemos actualmente y en la pantalla que se abriera veríamos este concepto que buscamos en el apartado de Longitud de Subcuentas.
+            <br><br>Para ver cual es la cantidad de dígitos por subcuenta nos iríamos al menú de Contabilidad > Ejercicios y pincharíamos sobre el ejercicio en el que estemos actualmente y en la pantalla que se abriera veríamos este concepto que buscamos en el apartado de Longitud de Subcuentas.
 
-                        <br><br>Bien, ahora vayamos a crear una subcuenta con una variable, por ejemplo si introducimos 4300000A significaría que a la hora de generar un asiento desde este Asiento Predefinido, nos preguntaría el asistente los dígitos que faltaran para completar la subcuenta, guardandolos en la variable A. Por lo que la partida donde estuviera esta subucuenta, si le introducimos 99 a la Variable A, nos crearía la subcuenta 430000099 en la generación del asiento. Pero una cosa a tener en cuenta es que FacturaScripts no nos va a permitir crear variables en minúsculas, ni tampoco más de una variable para una subcuenta.
-                        <br><br>Para subcuenta por ejemplo se permitiría ...
-                        <br>4300000A
-                        <br>4300000C                        
+            <br><br>Bien, ahora vayamos a crear una subcuenta con una variable, por ejemplo si introducimos 4300000A significaría que a la hora de generar un asiento desde este Asiento Predefinido, nos preguntaría el asistente los dígitos que faltaran para completar la subcuenta, guardandolos en la variable A. Por lo que la partida donde estuviera esta subucuenta, si le introducimos 99 a la Variable A, nos crearía la subcuenta 430000099 en la generación del asiento. Pero una cosa a tener en cuenta es que FacturaScripts no nos va a permitir crear variables en minúsculas, ni tampoco más de una variable para una subcuenta.
+            <br><br>Para subcuenta por ejemplo se permitiría ...
+            <br>4300000A
+            <br>4300000C                        
 
-                        <br><br>No se permitiría ...
-                        <br>430000AB ... más de una variable
-                        <br>4300000Z  ... Z variable sólo para Debe/Haber
-                        <br>43000000 ... no se permiten signos ni caracteres que no sean letras de la A-Z 4300000 ... no se permiten minúsculas en las variables.
+            <br><br>No se permitiría ...
+            <br>430000AB ... más de una variable
+            <br>4300000Z  ... Z variable sólo para Debe/Haber
+            <br>43000000 ... no se permiten signos ni caracteres que no sean letras de la A-Z 4300000 ... no se permiten minúsculas en las variables.
 
-                        <br><br>Ahora crearemos variables/fórmulas dentro de los campos/datos <b>Debe</b> o <b>Haber</b>. Lo primero que tenemos que tener en cuenta es que FacturaScripts no nos permite introducir ni números, ni signos raros, ni letras en minúsculas. Tampoco nos permite introducir un signo de cálculo sin poner después una variable. Los signos de cálculo/fórmula admitidos son "+ - / *"
+            <br><br>Ahora crearemos variables/fórmulas dentro de los campos/datos <b>Debe</b> o <b>Haber</b>. Lo primero que tenemos que tener en cuenta es que FacturaScripts no nos permite introducir ni números, ni signos raros, ni letras en minúsculas. Tampoco nos permite introducir un signo de cálculo sin poner después una variable. Los signos de cálculo/fórmula admitidos son "+ - / *"
 
-                        <br><br>Por lo que según lo anterior se permitirá por ejemplo ...
-                        <br>A
-                        <br>A-B
-                        <br>A/C-D
-                        <br>-E (permitido, pondría el valor de E en negativo)
+            <br><br>Por lo que según lo anterior se permitirá por ejemplo ...
+            <br>A
+            <br>A-B
+            <br>A/C-D
+            <br>-E (permitido, pondría el valor de E en negativo)
 
-                        <br><br>Pero no se permitirán por ejemplo ...
-                        <br>12A ... hay números
-                        <br>A-12 ... hay números
-                        <br>E- ... no hay variable después de un signo
-                        <br>a-Z ... hay variables en minúsculas
+            <br><br>Pero no se permitirán por ejemplo ...
+            <br>12A ... hay números
+            <br>A-12 ... hay números
+            <br>E- ... no hay variable después de un signo
+            <br>a-Z ... hay variables en minúsculas
 
-                        <br><br>En la pestaña variables, se crearían los mensajes que le aparecerían, al usuario que quisiera generar un asiento, desde un asiento predefinido por cada una de las variables usadas en la configuración de este predefinido. 
-                        <br><br>Por ejemplo si hemos creado en la pestaña Lineas la subcuenta 430000A, tendríamos que configurar la variable A en pestaña variables de la siguiente manera:
-                        <br><b>Código:</b> A
-                        <br><b>Mensaje:</b> Complete la cuenta del trabajador.
-                        
-                        <br><br>Y ya por último desde la pestaña generar, pasaríamos a crear el asiento usando el asiento predefinido desde el que estamos trabajando.
-                    </p>
-                </div>
-            </div>
-        </div>
+            <br><br>En la pestaña variables, se crearían los mensajes que le aparecerían, al usuario que quisiera generar un asiento, desde un asiento predefinido por cada una de las variables usadas en la configuración de este predefinido. 
+            <br><br>Por ejemplo si hemos creado en la pestaña Lineas la subcuenta 430000A, tendríamos que configurar la variable A en pestaña variables de la siguiente manera:
+            <br><b>Código:</b> A
+            <br><b>Mensaje:</b> Complete la cuenta del trabajador.
+
+            <br><br>Y ya por último desde la pestaña generar, pasaríamos a crear el asiento usando el asiento predefinido desde el que estamos trabajando.
+        </p>
     </div>
-{% endblock %}
