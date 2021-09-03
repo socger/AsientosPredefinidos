@@ -83,7 +83,7 @@ class AsientoPredefinidoLinea extends ModelClass
         $contadorVariables = 0;
         $hayCaracteresNoAdmitidos = 0;
         $hayFormulasIncorrectas = 0;
-        $hayVariableZ = 0;
+        // $hayVariableZ = 0;
         $haySignosFormula = 0;
         
         // Comprobamos cada uno de los caracteres para ver si lo admitimos
