@@ -79,14 +79,6 @@ class AsientoPredefinidoLinea extends ModelClass
     {
         $aDevolver = true;
         
-//        // hay variables en minúsculas ... false
-//        $hayNumeros = preg_replace("/[^0-9\s]/", "", $cantidad);
-//        if ($hayNumeros > 0) {
-//            $aDevolver = false;
-//            $this->toolBox()->i18nLog()->error('Para el ' . $debe_Haber . ' introdujo ' . $cantidad. ' Pero no puede tener números.');
-//        }
-//
-
         // Recorremos todos los caracteres para comprobar si hay caracteres no admitidos
         $contadorVariables = 0;
         $hayCaracteresNoAdmitidos = 0;
@@ -94,8 +86,6 @@ class AsientoPredefinidoLinea extends ModelClass
         $hayVariableZ = 0;
         $haySignosFormula = 0;
         
-        // No deben de haber dos variables seguidas sin un signo de fórmula antes
-
         // Comprobamos cada uno de los caracteres para ver si lo admitimos
         for ($i = 0; $i < strlen($cantidad); $i++) {
             $esCaracterNoAdmitido = true;
@@ -105,16 +95,18 @@ class AsientoPredefinidoLinea extends ModelClass
             if (in_array($cantidad[$i], $arraySignos)) {
                 $esCaracterNoAdmitido = false;
                 $haySignosFormula .= 1;
+
+                // Comprobar, ya que es un signo de fórmula, que es el siguiente caracter
                 if (($i + 1) === strlen($cantidad)) {
                     // El último caracter es un signo de fórmula, pero no hay más caracteres
                     $hayFormulasIncorrectas .= 1;
-                    $this->toolBox()->i18nLog()->error('1 Para el ' . $debe_Haber . ' de la subcuenta ' . $codsubcuenta . ' introdujo el signo ' . $cantidad[$i] . ' sin una variable después.');
+                    $this->toolBox()->i18nLog()->error('Para el ' . $debe_Haber . ' de la subcuenta ' . $codsubcuenta . ' introdujo el signo ' . $cantidad[$i] . ' es el último caracter y no hay ninguna variable después.');
                 } else {
                     // Cojemos el siguiente caracter y vemos si es una variable
                     $variable = preg_replace("/[^A-Z\s]/", "", $cantidad[($i + 1)]); // Sólo permitimos letras en mayúsculas
                     if (strlen($variable) === 0) {
                         $hayFormulasIncorrectas .= 1;
-                        $this->toolBox()->i18nLog()->error('2 Para el ' . $debe_Haber . ' de la subcuenta ' . $codsubcuenta . ' introdujo el signo ' . $cantidad[$i] . ' sin una variable después.');
+                        $this->toolBox()->i18nLog()->error('Para el ' . $debe_Haber . ' de la subcuenta ' . $codsubcuenta . ' introdujo el signo ' . $cantidad[$i] . ' sin una variable después.');
                     }
                 }
             }            
