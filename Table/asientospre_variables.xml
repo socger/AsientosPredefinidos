@@ -29,15 +29,6 @@
         <null>NO</null>
     </column>
     <column>
-        <name>mensaje</name>
-        <type>character varying(255)</type>
-    </column>
-    <column>
-        <name>tipo</name>
-        <type>character varying(1)</type>
-        <null>NO</null>
-    </column>
-    <column>
         <name>id</name>
         <type>serial</type>
         <null>NO</null>
@@ -45,6 +36,15 @@
     <column>
         <name>idasientopre</name>
         <type>integer</type>
+        <null>NO</null>
+    </column>
+    <column>
+        <name>mensaje</name>
+        <type>character varying(255)</type>
+    </column>
+    <column>
+        <name>tipo</name>
+        <type>character varying(1)</type>
         <null>NO</null>
     </column>
 
