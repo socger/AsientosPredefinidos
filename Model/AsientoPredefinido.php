@@ -45,54 +45,109 @@ class AsientoPredefinido extends ModelClass
     public $id;
     
 
-    public function getVariables(): array
+    protected function sustituirVariables(string &$sinVariable, string $conVariable, array $form, array $variables): string 
     {
-        $variable = new AsientoPredefinidoVariable();
-        $where = [new DataBaseWhere("idasientopre", $this->id)];
-        return $variable->all($where);
+        // Recorremos cada uno de los caracteres para ver si es variable o no
+        for ($i = 0; $i < strlen($conVariable); $i++) {
+            $caracter = preg_replace("/[^A-Z\s]/", "", $conVariable[$i]); // Sólo permitimos letras en mayúsculas
+
+            if (strlen($caracter) > 0) {
+                // Es una variable, así que sustituimos el caracter por el valor de la variable que tehemos en $form
+                // Pero antes tenemos que recorrer todas las variables para ver si está creada, si no lo estuviera sacar mensaje de ello
+                $laVariableExiste = false;
+                
+                foreach ($variables as $variable) {
+                    if ($caracter === $variable['codigo']) {
+                        $laVariableExiste = true;
+                    }
+                }
+
+                if ($laVariableExiste === true) {
+                    $sinVariable .= $form[$caracter]; 
+                } else {
+                    return false; // Salimos sin terminar de sustituir las variables
+                }
+                
+            } else {
+                // No es una variable, así que añadimos el caracter como parte de la subcuenta
+                $sinVariable .= $caracter;
+            }
+
+        }
+
+        return true;
     }
 
-
+    protected function getVariables(): array
+    {
+        // Traemos todas las variables del asiento predefinido
+        $variable = new AsientoPredefinidoVariable(); // Creamos el modelo $variable -> AsientoPredefinidoVariable()
+        $where = [new DataBaseWhere("idasientopre", $this->id)]; // Filtramos por el id de este asiento predefinido
+        
+        return $variable->all($where); // Devolvemos el array de todas las variables creadas para este asiento predefinido
+    }
+    
     public function generate(array $form): Asiento
     {
-        return $asiento;
-        
-        $asiento = new Asiento();
+        $asiento = new Asiento(); // Creamos un modelo asiento
 
-        $asiento->idempresa = $form["idempresa"];
-        $asiento->setDate($form["fecha"]);
+        $asiento->idempresa = $form["idempresa"]; // Rellenamos al asiento el idempresa del form
+        $asiento->setDate($form["fecha"]); // Rellenamos al asiento el campo fecha
+        $asiento->concepto = $this->concepto; // Asignamos al concepto el campo concepto de la cabecera del asiento predefinido
         
-        $asiento->concepto = $this->concepto;
         
-        return $asiento;
-        
-/*        
         if (false === $asiento->save()) {
+            // No se pudo crear la cabecera del asiento, así que devolvemos el asiento incompleto
             return $asiento;
         }
 
-        recorrer las líneas y buscar por cada variable el valor
-        crear array de valores de líneas
+        $variables = $this->getVariables(); // Traemos en un array todas las variables creadas para el asiento predefinido.
         
+
+        // Recorremos todas las líneas/partidas del asiento predefinido para crearlas en el asiento que estamos creando
         foreach ($this->getLines() as $line) {
+            $newLine = $asiento->getNewLine(); // Crea la línea pero con los campos vacíos
             
-            // jerofa ... consultar el valor de la variable que tuviera o la subcuenta o el debe/haber para añadirselo o calcular
+            // Creamos la subcuenta sustituyendo las variables que tuviera por su valor
+            $subcuenta = '';
+            if (sustituirVariables($subcuenta, $line->codsubcuenta, $form, $variables) === false) {
+                // Hay variables que todavía no se han creado para la subcuenta
+                $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
+                return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
+            }
             
-            $newLine = $asiento->getNewLine();
-            $newLine->codsubcuenta = $line->codsubcuenta;
-            // $newLine->codcontrapartida = $line->codcontrapartida; // Los asientos predefinidos no van a tener contrapartida
+            // Creamos el debe sustituyendo las variables que tuviera por su valor
+            $debe = '';
+            if (sustituirVariables($debe, $line->debe, $form, $variables) === false) {
+                // Hay variables que todavía no se han creado para la subcuenta
+                $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
+                return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
+            }
+            eval('$debe = ' . $debe . ';'); // Por si en $line->debe había una fórmula
+            
+            // Creamos el haber sustituyendo las variables que tuviera por su valor
+            $haber = '';
+            if (sustituirVariables($haber, $line->haber, $form, $variables) === false) {
+                // Hay variables que todavía no se han creado para la subcuenta
+                $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
+                return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
+            }
+            eval('$haber = ' . $haber . ';'); // Por si en $line->haber había una fórmula
+            
+            // Una vez calculados bien los valores con variables, los asignamos a la línea
+            $newLine->codsubcuenta = $subcuenta;
             $newLine->concepto = $line->concepto;
-            $newLine->debe = $line->debe;
-            $newLine->haber = $line->haber;
+            $newLine->debe = $debe;
+            $newLine->haber = $haber;
             
             if (false === $newLine->save()) {
-                $asiento->delete(); // Si no se graba, pues borra la cabecera del asiento
-                return $asiento;
+                // No se ha podido grabar la línea
+                $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
+                return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
             }
         }
 
         return $asiento;
-*/
     }
 
     public function getLines(): array
