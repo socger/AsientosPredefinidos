@@ -74,6 +74,48 @@ class AsientoPredefinidoLinea extends ModelClass
         // $this->haber = '0';
         $this->orden = 0;
     }
+    
+    private function comprobarSubcuenta(string $codsubcuenta) : bool {
+        $aDevolver = true;
+
+        // Dejamos sólo los caracteres aceptados ... números(0-9) y letras en mayúsculas (A-Z)
+        $caracteresAceptados = preg_replace("/[^A-Z0-9\s]/", "", $codsubcuenta);
+
+        // Comprobamos si introdujo algún caracter no admitido
+        if (strlen($caracteresAceptados) <> strlen($codsubcuenta)) {
+            $aDevolver = false;
+            $this->toolBox()->i18nLog()->error('Para la subcuenta introdujo ' . $codsubcuenta . '. Pero la subcuenta sólo puede tener números(0-9) ó letras en mayúsculas (A-Z)');
+        }
+        
+        // Recorremos todos los caracteres admitidos para ver si hay más de una variable y para ver si han usado la variable Z (es variable de resultados (descuadre del asiento)
+        $contadorVariables = 0;
+        $hayVariableZ = 0;
+        
+        for ($i = 0; $i < strlen($caracteresAceptados); $i++) {
+            
+            $variable = preg_replace("/[^A-Z\s]/", "", $caracteresAceptados[$i]); // Sólo dejamos letras en mayúsculas
+            if (strlen($variable) > 0) {
+                $contadorVariables .= 1;
+            }
+            
+            if ($variable === 'Z') {
+                $hayVariableZ .= 1;
+            }
+        }
+
+        if ($hayVariableZ > 0) {
+            $aDevolver = false;
+            $this->toolBox()->i18nLog()->error('Para la subcuenta introdujo ' . $codsubcuenta . '. Pero la subcuenta no puede tener la variable Z (DESCUADRE del asiento)');
+        }
+        
+
+        if ($contadorVariables > 1) {
+            $aDevolver = false;
+            $this->toolBox()->i18nLog()->error('Para la subcuenta introdujo ' . $codsubcuenta . '. Pero la subcuenta no puede tener más de una variable (letras en mayúsculas A-Z)');
+        }
+        
+        return $aDevolver;
+    }
 
     public static function primaryColumn()
     {
@@ -87,6 +129,10 @@ class AsientoPredefinidoLinea extends ModelClass
 
     public function test()
     {
+        if ($this->comprobarSubcuenta($this->codsubcuenta) === false) {
+            return false;
+        }
+        
         $utils = $this->toolBox()->utils();
         $this->codsubcuenta = $utils->noHtml($this->codsubcuenta);
         $this->concepto = $utils->noHtml($this->concepto);
