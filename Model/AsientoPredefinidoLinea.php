@@ -75,6 +75,73 @@ class AsientoPredefinidoLinea extends ModelClass
         $this->orden = 0;
     }
     
+    private function comprobarCantidad(string $codsubcuenta, string $cantidad, string $debe_Haber): bool 
+    {
+        $aDevolver = true;
+        
+//        // hay variables en minúsculas ... false
+//        $hayNumeros = preg_replace("/[^0-9\s]/", "", $cantidad);
+//        if ($hayNumeros > 0) {
+//            $aDevolver = false;
+//            $this->toolBox()->i18nLog()->error('Para el ' . $debe_Haber . ' introdujo ' . $cantidad. ' Pero no puede tener números.');
+//        }
+//
+
+        // Recorremos todos los caracteres para comprobar si hay caracteres no admitidos
+        $contadorVariables = 0;
+        $hayCaracteresNoAdmitidos = 0;
+        $hayFormulasIncorrectas = 0;
+        $hayVariableZ = 0;
+        $haySignosFormula = 0;
+        
+        // No deben de haber dos variables seguidas sin un signo de fórmula antes
+
+        // Comprobamos cada uno de los caracteres para ver si lo admitimos
+        for ($i = 0; $i < strlen($cantidad); $i++) {
+            $esCaracterNoAdmitido = true;
+            
+            // Comprobamos si es 
+            $arraySignos = array("+", "-", "/", "*");
+            if (in_array($cantidad[$i], $arraySignos)) {
+                $esCaracterNoAdmitido = false;
+                $haySignosFormula .= 1;
+                if (($i + 1) === strlen($cantidad)) {
+                    // El último caracter es un signo de fórmula, pero no hay más caracteres
+                    $hayFormulasIncorrectas .= 1;
+                    $this->toolBox()->i18nLog()->error('1 Para el ' . $debe_Haber . ' de la subcuenta ' . $codsubcuenta . ' introdujo el signo ' . $cantidad[$i] . ' sin una variable después.');
+                } else {
+                    // Cojemos el siguiente caracter y vemos si es una variable
+                    $variable = preg_replace("/[^A-Z\s]/", "", $cantidad[($i + 1)]); // Sólo permitimos letras en mayúsculas
+                    if (strlen($variable) === 0) {
+                        $hayFormulasIncorrectas .= 1;
+                        $this->toolBox()->i18nLog()->error('2 Para el ' . $debe_Haber . ' de la subcuenta ' . $codsubcuenta . ' introdujo el signo ' . $cantidad[$i] . ' sin una variable después.');
+                    }
+                }
+            }            
+            
+            $variable = preg_replace("/[^A-Z\s]/", "", $cantidad[$i]); // Sólo permitimos letras en mayúsculas
+            if (strlen($variable) > 0) {
+                $esCaracterNoAdmitido = false;
+                $contadorVariables .= 1;
+            }
+
+            if ($esCaracterNoAdmitido === true) {
+                $hayCaracteresNoAdmitidos .= 1;
+            }
+        }
+
+        if ($hayCaracteresNoAdmitidos > 0) {
+            $aDevolver = false;
+            $this->toolBox()->i18nLog()->error('Para el ' . $debe_Haber . ' de la subcuenta ' . $codsubcuenta . ' introdujo ' . $cantidad . '. Pero sólo pueden tener variables (A-Z) y signos para cálculos (+ - / *)');
+        }
+        
+        if ($hayFormulasIncorrectas > 0) {
+            $aDevolver = false;
+        }
+
+        return $aDevolver;
+    }
+
     private function comprobarSubcuenta(string $codsubcuenta) : bool {
         $aDevolver = true;
 
@@ -93,7 +160,7 @@ class AsientoPredefinidoLinea extends ModelClass
         
         for ($i = 0; $i < strlen($caracteresAceptados); $i++) {
             
-            $variable = preg_replace("/[^A-Z\s]/", "", $caracteresAceptados[$i]); // Sólo dejamos letras en mayúsculas
+            $variable = preg_replace("/[^A-Z\s]/", "", $caracteresAceptados[$i]); // Sólo permitimos letras en mayúsculas
             if (strlen($variable) > 0) {
                 $contadorVariables .= 1;
             }
@@ -130,6 +197,14 @@ class AsientoPredefinidoLinea extends ModelClass
     public function test()
     {
         if ($this->comprobarSubcuenta($this->codsubcuenta) === false) {
+            return false;
+        }
+        
+        if ($this->comprobarCantidad($this->codsubcuenta, $this->debe, "DEBE") === false) {
+            return false;
+        }
+        
+        if ($this->comprobarCantidad($this->codsubcuenta, $this->haber, 'HABER') === false) {
             return false;
         }
         
