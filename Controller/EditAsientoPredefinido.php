@@ -46,12 +46,20 @@ class EditAsientoPredefinido extends EditController
         $this->createViewsInfo();
         $this->createViewsLineas();
         $this->createViewsVariables();
+        $this->createViewsGenerar();
         
         $this->setTabsPosition('bottom'); // Las posiciones de las pestañas pueden ser left, top, bottom
     }
     
+    protected function createViewsGenerar(string $viewName = 'Generar') {
+        $this->addHtmlView($viewName, 'AsientoPredefinidoGenerar', 'AsientoPredefinido', 'generate', 'fas fa-magic');
+
+//        $this->addEditListView($viewName, 'AsientoPredefinidoVariable', 'generate', 'fas fa-magic');
+//        $this->views[$viewName]->setInLine(true);
+    }
+
     protected function createViewsInfo(string $viewName = 'Info') {
-        $this->addHtmlView($viewName, 'AsientoPredefinidoInfo', 'AsientoPredefinido', 'help', 'fas fa-question-circle');
+        $this->addHtmlView($viewName, 'AsientoPredefinidoInfo', 'AsientoPredefinido', 'help', 'fas fa-info-circle');
     }
 
     protected function createViewsLineas(string $viewName = 'EditAsientoPredefinidoLinea')
@@ -62,7 +70,7 @@ class EditAsientoPredefinido extends EditController
 
     protected function createViewsVariables(string $viewName = 'EditAsientoPredefinidoVariable')
     {
-        $this->addEditListView($viewName, 'AsientoPredefinidoVariable', 'Variables');
+        $this->addEditListView($viewName, 'AsientoPredefinidoVariable', 'variables', 'fas fa-tools');
         $this->views[$viewName]->setInLine(true);
     }
     
@@ -78,13 +86,15 @@ class EditAsientoPredefinido extends EditController
 
     protected function generateAccountingAction()
     {
-        $date = (string)$this->request->request->get('date', self::toolBox()::today());
-        $idempresa = (int)$this->request->request->get('idempresa');
-        if (empty($date) || empty($idempresa)) {
+        $form = $this->request->request->all();
+        
+        if ( empty($form["fecha"]) || empty($form["idempresa"]) ) {
+            $this->toolBox()->i18nLog()->error('No ha introducido ni la empresa, ni la fecha');
             return;
         }
 
-        $asiento = $this->getModel()->generate($date, $idempresa);
+        $asiento = $this->getModel()->generate($form);
+        
         if ($asiento->exists()) {
             $this->toolBox()->i18nLog()->info('generated-accounting-entries', ['%quantity%' => 1]);
             $this->redirect($asiento->url(), 1); // El parámetro 1 es un temporizador en redireccionar, así el usuario ve el mensaje de la línea anterior
@@ -112,17 +122,6 @@ class EditAsientoPredefinido extends EditController
             
             default:
                 parent::loadData($viewName, $view);
-
-                // Sólo si el registro existe se añade el botón
-                if ($view->model->exists()) {
-                    $this->addButton($viewName, [
-                        "action" => "gen-accounting",
-                        "color" => "success",
-                        "label" => "generate",
-                        "icon" => "fas fa-magic",
-                        "type" => "modal"
-                    ]);
-                }
                 break;
         }
     }
