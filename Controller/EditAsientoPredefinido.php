@@ -43,10 +43,15 @@ class EditAsientoPredefinido extends EditController
     {
         parent::createViews();
         
+        $this->createViewsInfo();
         $this->createViewsLineas();
         $this->createViewsVariables();
         
-        $this->setTabsPosition('top'); // Las posiciones de las pestañas pueden ser left, top, bottom
+        $this->setTabsPosition('bottom'); // Las posiciones de las pestañas pueden ser left, top, bottom
+    }
+    
+    protected function createViewsInfo(string $viewName = 'Info') {
+        $this->addHtmlView($viewName, 'AsientoPredefinidoInfo', 'AsientoPredefinido', 'help', 'fas fa-question-circle');
     }
 
     protected function createViewsLineas(string $viewName = 'EditAsientoPredefinidoLinea')
