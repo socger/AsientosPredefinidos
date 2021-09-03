@@ -105,6 +105,7 @@ class EditAsientoPredefinido extends EditController
 
         // Presentamos un error por no haberse creado el asiento
         $this->toolBox()->i18nLog()->warning('record-save-error');
+        $this->toolBox()->i18nLog()->warning('Revise si nos falta por crear alguna variable para este asiento predefinido');
     }
 
     protected function loadData($viewName, $view)
