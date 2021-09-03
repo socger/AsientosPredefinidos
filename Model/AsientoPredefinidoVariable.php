@@ -32,16 +32,6 @@ class AsientoPredefinidoVariable extends ModelClass
     public $codigo;
 
     /**
-     * @var string
-     */
-    public $mensaje;
-    
-    /**
-     * @var string
-     */
-    public $tipo;
-    
-    /**
      * @var int
      */
     public $id;
@@ -51,12 +41,16 @@ class AsientoPredefinidoVariable extends ModelClass
      */
     public $idasientopre;
 
-
-    public function clear()
-    {
-        parent::clear();
-    }
-
+    /**
+     * @var string
+     */
+    public $mensaje;
+    
+    /**
+     * @var string
+     */
+    public $tipo;
+    
     public static function primaryColumn()
     {
         return "id";
