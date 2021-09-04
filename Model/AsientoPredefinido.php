@@ -44,47 +44,67 @@ class AsientoPredefinido extends ModelClass
      */
     public $id;
     
-    protected function varLineReplace(string &$sinVariable, string $conVariable, array $form, array $variables): bool
+    protected function addToVariables(string $toCheck, &$array)
     {
-        // Recorremos cada uno de los caracteres para ver si es variable o no
-        for ($i = 0; $i < strlen($conVariable); $i++) {
-            $caracter = preg_replace("/[^A-Z\s]/", "", $conVariable[$i]); // Sólo permitimos letras en mayúsculas
-            if (strlen($caracter) <= 0) {
-                // No es una variable, así que añadimos el caracter como parte de la subcuenta
-                $sinVariable .= $caracter;
-                continue;
-            }
+        // Dejamos sólo los caracteres aceptados ... letras en mayúsculas (A-Z).
+        $caracteresAceptados = preg_replace("/[^A-Z\s]/", "", $toCheck);
 
-            // Es una variable, así que sustituimos el caracter por el valor de la variable que tenemos en $form
-            // Pero antes tenemos que recorrer todas las variables para ver si está creada, si no lo estuviera sacar mensaje de ello
-            $laVariableExiste = false;
-            foreach ($variables as $variable) {
-                if ($caracter === $variable['codigo']) {
-                    $laVariableExiste = true;
-                    break;
+        for ($i = 0; $i < strlen($caracteresAceptados); $i++) {
+            if ($caracteresAceptados[$i] <> 'Z') { // La Z ... NO ES UNA VARIABLE a crear su valor en pestaña Generar de Asientos Predefinidos, AUNQUE se usará para poner el valor del descuadre del asiento
+                $existeEnArray = false;
+                foreach ($array as &$valor) {
+                    if ($valor === $caracteresAceptados[$i]) {
+                        $existeEnArray = true;
+                        break;
+                    }
+                }
+                
+                if ($existeEnArray === false) {
+                    $array[] = $caracteresAceptados[$i];
                 }
             }
-
-            if ($laVariableExiste === true) {
-                $sinVariable .= $form['var_' . $caracter];
-                continue;
-            }
-            
-            return false; // Salimos sin terminar de sustituir las variables
         }
-
-        return true;
-    }
-
-    protected function getVariables(): array
-    {
-        // Traemos todas las variables del asiento predefinido
-        $variable = new AsientoPredefinidoVariable(); // Creamos el modelo $variable -> AsientoPredefinidoVariable()
-        $where = [new DataBaseWhere("idasientopre", $this->id)]; // Filtramos por el id de este asiento predefinido
-        
-        return $variable->all($where); // Devolvemos el array de todas las variables creadas para este asiento predefinido
     }
     
+    protected function checkLinesWithVariables(array $variables, array $lines): bool
+    {
+        $aDevolver = true;
+        
+        $variablesEnLineas = [];
+        $variablesEnVariables = [];
+        
+        // Contamos la cantidad de variables usadas en pestaña Líneas de Asientos Predefinidos
+        foreach ($lines as $line) {
+            $this->addToVariables($line->codsubcuenta, $variablesEnLineas);
+            $this->addToVariables($line->debe, $variablesEnLineas);
+            $this->addToVariables($line->haber, $variablesEnLineas);
+        }
+        
+        // Contamos la cantidad de variables usadas en pestaña Variables de Asientos Predefinidos
+        foreach ($variables as $variable) {
+            if ($variable['codigo'] <> 'Z') { // La Z ... NO ES UNA VARIABLE a crear su valor en pestaña Generar de Asientos Predefinidos, AUNQUE se usará para poner el valor del descuadre del asiento
+                $existeEnArray = false;
+                foreach ($variablesEnVariables as &$valor) {
+                    if ($valor === $variable['codigo']) {
+                        $existeEnArray = true;
+                        break;
+                    }
+                }
+                
+                if ($existeEnArray === false) {
+                    $variablesEnVariables[] = $variable['codigo'];
+                }
+            }
+        }
+
+        // Comprobamos la cantidad de variables de pestaña Líneas con la cantidad de variables de pestaña Variables
+        if ( count($variablesEnLineas) <> count($variablesEnVariables) ) {
+            $aDevolver = false;
+        }
+        
+        return $aDevolver;
+    }
+
     public function generate(array $form): Asiento
     {
         $asiento = new Asiento(); // Creamos un modelo asiento
@@ -100,10 +120,18 @@ class AsientoPredefinido extends ModelClass
         }
 
         $variables = $this->getVariables(); // Traemos en un array todas las variables creadas para el asiento predefinido.
-        
+        $lines = $this->getLines();
 
+        // Primero comprobaremos la cantidad de variables creadas en las líneas del asiento predefinido
+        // Luego comprobaremos la cantidad de variables creadas (pestaña Generar del asiento predefinido)
+        // Ambas cantidades debe de ser igual, además debemos de comprobar si todas las variables tienen su valor introducido para el asiento que vamos acrear
+        if ($this->checkLinesWithVariables($variables, $lines) === false) {
+            $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
+            return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
+        }
+        
         // Recorremos todas las líneas/partidas del asiento predefinido para crearlas en el asiento que estamos creando
-        foreach ($this->getLines() as $line) {
+        foreach ($lines as $line) {
             $newLine = $asiento->getNewLine(); // Crea la línea pero con los campos vacíos
             
             // Creamos la subcuenta sustituyendo las variables que tuviera por su valor
@@ -155,6 +183,15 @@ class AsientoPredefinido extends ModelClass
         return $line->all($where);
     }
 
+    protected function getVariables(): array
+    {
+        // Traemos todas las variables del asiento predefinido
+        $variable = new AsientoPredefinidoVariable(); // Creamos el modelo $variable -> AsientoPredefinidoVariable()
+        $where = [new DataBaseWhere("idasientopre", $this->id)]; // Filtramos por el id de este asiento predefinido
+        
+        return $variable->all($where); // Devolvemos el array de todas las variables creadas para este asiento predefinido
+    }
+    
     public static function primaryColumn()
     {
         return "id";
@@ -177,6 +214,38 @@ class AsientoPredefinido extends ModelClass
     public function url(string $type = 'auto', string $list = 'ListAsiento?activetab=List'): string
     {
         return parent::url($type, $list);
+    }
+    
+    protected function varLineReplace(string &$sinVariable, string $conVariable, array $form, array $variables): bool
+    {
+        // Recorremos cada uno de los caracteres para ver si es variable o no
+        for ($i = 0; $i < strlen($conVariable); $i++) {
+            $caracter = preg_replace("/[^A-Z\s]/", "", $conVariable[$i]); // Sólo permitimos letras en mayúsculas
+            if (strlen($caracter) <= 0) {
+                // No es una variable, así que añadimos el caracter como parte de la subcuenta
+                $sinVariable .= $caracter;
+                continue;
+            }
+
+            // Es una variable, así que sustituimos el caracter por el valor de la variable que tenemos en $form
+            // Pero antes tenemos que recorrer todas las variables para ver si está creada, si no lo estuviera sacar mensaje de ello
+            $laVariableExiste = false;
+            foreach ($variables as $variable) {
+                if ($caracter === $variable['codigo']) {
+                    $laVariableExiste = true;
+                    break;
+                }
+            }
+
+            if ($laVariableExiste === true) {
+                $sinVariable .= $form['var_' . $caracter];
+                continue;
+            }
+            
+            return false; // Salimos sin terminar de sustituir las variables
+        }
+
+        return true;
     }
 
 }
