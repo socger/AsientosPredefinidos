@@ -44,35 +44,33 @@ class AsientoPredefinido extends ModelClass
      */
     public $id;
     
-
-    protected function sustituirVariables(string &$sinVariable, string $conVariable, array $form, array $variables): string 
+    protected function varLineReplace(string &$sinVariable, string $conVariable, array $form, array $variables): bool
     {
         // Recorremos cada uno de los caracteres para ver si es variable o no
         for ($i = 0; $i < strlen($conVariable); $i++) {
             $caracter = preg_replace("/[^A-Z\s]/", "", $conVariable[$i]); // Sólo permitimos letras en mayúsculas
-
-            if (strlen($caracter) > 0) {
-                // Es una variable, así que sustituimos el caracter por el valor de la variable que tehemos en $form
-                // Pero antes tenemos que recorrer todas las variables para ver si está creada, si no lo estuviera sacar mensaje de ello
-                $laVariableExiste = false;
-                
-                foreach ($variables as $variable) {
-                    if ($caracter === $variable['codigo']) {
-                        $laVariableExiste = true;
-                    }
-                }
-
-                if ($laVariableExiste === true) {
-                    $sinVariable .= $form[$caracter]; 
-                } else {
-                    return false; // Salimos sin terminar de sustituir las variables
-                }
-                
-            } else {
+            if (strlen($caracter) <= 0) {
                 // No es una variable, así que añadimos el caracter como parte de la subcuenta
                 $sinVariable .= $caracter;
+                continue;
             }
 
+            // Es una variable, así que sustituimos el caracter por el valor de la variable que tenemos en $form
+            // Pero antes tenemos que recorrer todas las variables para ver si está creada, si no lo estuviera sacar mensaje de ello
+            $laVariableExiste = false;
+            foreach ($variables as $variable) {
+                if ($caracter === $variable['codigo']) {
+                    $laVariableExiste = true;
+                    break;
+                }
+            }
+
+            if ($laVariableExiste === true) {
+                $sinVariable .= $form['var_' . $caracter];
+                continue;
+            }
+            
+            return false; // Salimos sin terminar de sustituir las variables
         }
 
         return true;
@@ -110,7 +108,7 @@ class AsientoPredefinido extends ModelClass
             
             // Creamos la subcuenta sustituyendo las variables que tuviera por su valor
             $subcuenta = '';
-            if (sustituirVariables($subcuenta, $line->codsubcuenta, $form, $variables) === false) {
+            if ($this->varLineReplace($subcuenta, $line->codsubcuenta, $form, $variables) === false) {
                 // Hay variables que todavía no se han creado para la subcuenta
                 $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
                 return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
@@ -118,7 +116,7 @@ class AsientoPredefinido extends ModelClass
             
             // Creamos el debe sustituyendo las variables que tuviera por su valor
             $debe = '';
-            if (sustituirVariables($debe, $line->debe, $form, $variables) === false) {
+            if ($this->varLineReplace($debe, $line->debe, $form, $variables) === false) {
                 // Hay variables que todavía no se han creado para la subcuenta
                 $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
                 return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
@@ -127,7 +125,7 @@ class AsientoPredefinido extends ModelClass
             
             // Creamos el haber sustituyendo las variables que tuviera por su valor
             $haber = '';
-            if (sustituirVariables($haber, $line->haber, $form, $variables) === false) {
+            if ($this->varLineReplace($haber, $line->haber, $form, $variables) === false) {
                 // Hay variables que todavía no se han creado para la subcuenta
                 $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
                 return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
