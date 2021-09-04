@@ -1,7 +1,5 @@
-<form action = "{{fsc.url()}}&activetab=Generar" method="post" >
-{#<form action = "{{fsc.url()}}" method="post" >#}
+<form action = "{{ fsc.getModel().url() }}&activetab=Generar" method="post" >
     <div class="card shadow p-3">
-        
         <div class="form-row">
             <div class="col-3">
                 <div class="form-group">
@@ -34,7 +32,7 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text">{{ variable.codigo }}</span>
                         </div>
-                        <input type="number" class="form-control" name="var_{{ variable.codigo }}" required="">
+                        <input type="number" step="any" class="form-control" name="var_{{ variable.codigo }}" required="">
                     </div>                
                 </div>                
             {% endfor %}
@@ -45,10 +43,6 @@
             <button type="submit" class="btn btn-success" name="action" value="gen-accounting">
                 {{ i18n.trans("generate") }}
             </button>    
-        </div> 
-
-
+        </div>
     </div>
 </form>
-
-
