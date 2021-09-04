@@ -149,7 +149,16 @@ class AsientoPredefinido extends ModelClass
                 $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
                 return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
             }
-            eval('$debe = ' . $debe . ';'); // Por si en $line->debe había una fórmula
+            
+            try {
+                eval('$debe = ' . $debe . ';'); // Por si en $line->debe había una fórmula
+            } catch (Exception $e) {
+                // echo 'Excepción capturada: ',  $e->getMessage(), "\n";
+
+                // No se pudo modificar el valor del Debe
+                $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
+                return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
+            }
             
             // Creamos el haber sustituyendo las variables que tuviera por su valor
             $haber = '';
@@ -158,7 +167,16 @@ class AsientoPredefinido extends ModelClass
                 $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
                 return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
             }
-            eval('$haber = ' . $haber . ';'); // Por si en $line->haber había una fórmula
+            
+            try {
+                eval('$haber = ' . $haber . ';'); // Por si en $line->haber había una fórmula
+            } catch (Exception $e) {
+                // echo 'Excepción capturada: ',  $e->getMessage(), "\n";
+
+                // No se pudo modificar el valor del Haber
+                $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
+                return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
+            }
             
             // Una vez calculados bien los valores con variables, los asignamos a la línea
             $newLine->codsubcuenta = $subcuenta;
@@ -167,7 +185,7 @@ class AsientoPredefinido extends ModelClass
             $newLine->haber = $haber;
             
             if (false === $newLine->save()) {
-                // No se ha podido grabar la línea
+                // No se pudo grabar la línea
                 $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
                 return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
             }
