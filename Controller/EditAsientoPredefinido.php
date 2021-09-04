@@ -73,7 +73,7 @@ class EditAsientoPredefinido extends EditController
         $this->addEditListView($viewName, 'AsientoPredefinidoVariable', 'variables', 'fas fa-tools');
         $this->views[$viewName]->setInLine(true);
     }
-    
+
     protected function execAfterAction($action)
     {
         if ($action === 'gen-accounting') {
@@ -81,8 +81,20 @@ class EditAsientoPredefinido extends EditController
             return;
         }
 
-        parent::execAfterAction($action);
+         parent::execAfterAction($action);
     }
+    
+/*    
+    protected function execPreviousAction($action)
+    {
+        if ($action === 'gen-accounting') {
+            $this->generateAccountingAction();
+            return false; // No continuamos con la carga de datos
+        }
+
+         parent::execPreviousAction($action);
+    }
+*/
 
     protected function generateAccountingAction()
     {
