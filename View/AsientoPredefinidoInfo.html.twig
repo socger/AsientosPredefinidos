@@ -13,8 +13,14 @@
 
         <p>
             Una vez creada la cabecera del Asiento Predefinido con el que vamos a trabajar, se activarán las pestañas de Ayuda, Líneas, Variables y Generar.
+        </p>
 
-            <br><br>La pestaña de Líneas nos sirve para preestablecer las partidas/subcuentas o registros que generarán el asiento.
+        <h2>
+            Pestaña - Líneas
+        </h2>
+            
+        <p>
+            La pestaña de Líneas nos sirve para preestablecer las partidas/subcuentas o registros que generarán el asiento.
             <br>Para ello y por cada línea a crear/modificar nos pedirá FacturaScripts los siguientes datos:
 
             <br><br><b>Subcuenta.-</b> Será para introducir la subcuenta con la que generaremos la línea del asiento. 
@@ -34,9 +40,14 @@
             <br>4300000Z  ... Z variable sólo para Debe/Haber
             <br>43000000 ... no se permiten signos ni caracteres que no sean letras de la A-Z 4300000 ... no se permiten minúsculas en las variables.
 
-            <br><br>Ahora crearemos variables/fórmulas dentro de los campos/datos <b>Debe</b> o <b>Haber</b>. Lo primero que tenemos que tener en cuenta es que FacturaScripts no nos permite introducir ni números, ni signos raros, ni letras en minúsculas. Tampoco nos permite introducir un signo de cálculo sin poner después una variable. Los signos de cálculo/fórmula admitidos son "+ - / *"
+            
+            <br><br><b>Descripción.-</b> Una breve descripción para la línea del asiento
+            
+            
+            <br><br><b>Debe/Haber.-</b> Como su nombre indica, serían las cantidades que rellenaríamos a la hora de crear nuestro asiento.
+            <br>Pero estos son datos que completaremos con variables/fórmulas. Por lo que lo primero que tenemos que tener en cuenta es que FacturaScripts no nos permite introducir ni números, ni signos raros, ni letras en minúsculas en estas columas/datos. Tampoco nos permite introducir un signo de cálculo sin poner después una variable. Y que los signos de cálculo/fórmula admitidos son "+ - / *"
 
-            <br><br>Por lo que según lo anterior se permitirá por ejemplo ...
+            <br><br>Por lo que según lo anterior se permitiría por ejemplo ...
             <br>A
             <br>A-B
             <br>A/C-D
@@ -47,12 +58,32 @@
             <br>A-12 ... hay números
             <br>E- ... no hay variable después de un signo
             <br>a-Z ... hay variables en minúsculas
+        </p>
 
-            <br><br>En la pestaña variables, se crearían los mensajes que le aparecerían, al usuario que quisiera generar un asiento, desde un asiento predefinido por cada una de las variables usadas en la configuración de este predefinido. 
+        <h2>
+            Pestaña - Variables
+        </h2>
+            
+        <p>
+            En la pestaña variables, se crearían los mensajes que le aparecerían, al usuario que quisiera generar un asiento, por cada una de las variables usadas en la configuración de este predefinido. 
+            
             <br><br>Por ejemplo si hemos creado en la pestaña Lineas la subcuenta 430000A, tendríamos que configurar la variable A en pestaña variables de la siguiente manera:
             <br><b>Código:</b> A
             <br><b>Mensaje:</b> Complete la cuenta del trabajador.
+            
+            <br><br>La variable Z es una variable que no hace falta crearla. Esta variable sólo debe de ser usada en las columnas Debe/Haber. Y cuando se está generando el asiento, esta variable es sustituida por el descuadre que tenga el asiento a la hora de crear la línea en la que se encuentre.
+        </p>
 
-            <br><br>Y ya por último desde la pestaña generar, pasaríamos a crear el asiento usando el asiento predefinido desde el que estamos trabajando.
+        <h2>
+            Pestaña - Generar
+        </h2>
+            
+        <p>
+            Desde esta pestaña, pasaríamos a crear el asiento usando el asiento predefinido desde el que estamos trabajando. Antes de pulsar el botón de Generar que esta pestaña tiene, primero tenemos que completar los datos que necesitamos para generar el asiento.
+            <br><b>Fecha:</b> La fecha del asiento que vamos a crear.
+            <br><b>Empresa:</b> La empresa donde va a ser creado el nuevo asiento.
+            <br><b>Valores:</b> Por cada variable que hemos creado en la pestaña Variables, tendríamos que introducir sus valores.
+            
+            <br><br>Ahora sería el momento de pulsar el botón de <b>Generar</b>. Lo primero que hará antes de crear el asiento es comprobar si la cantidad de variables usadas en pestaña líneas es la misma cantidad de variables creadas en pestaña Variables. Luego comprobará que a todas las variables se les haya rellenado su valor. Y si todo está Ok intentará crear el asiento basándose en este asiento predefinido creado.
         </p>
     </div>

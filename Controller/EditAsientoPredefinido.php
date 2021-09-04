@@ -73,7 +73,7 @@ class EditAsientoPredefinido extends EditController
         $this->addEditListView($viewName, 'AsientoPredefinidoVariable', 'variables', 'fas fa-tools');
         $this->views[$viewName]->setInLine(true);
     }
-    
+
     protected function execAfterAction($action)
     {
         if ($action === 'gen-accounting') {
@@ -81,8 +81,20 @@ class EditAsientoPredefinido extends EditController
             return;
         }
 
-        parent::execAfterAction($action);
+         parent::execAfterAction($action);
     }
+    
+/*    
+    protected function execPreviousAction($action)
+    {
+        if ($action === 'gen-accounting') {
+            $this->generateAccountingAction();
+            return false; // No continuamos con la carga de datos
+        }
+
+         parent::execPreviousAction($action);
+    }
+*/
 
     protected function generateAccountingAction()
     {
@@ -105,7 +117,7 @@ class EditAsientoPredefinido extends EditController
 
         // Presentamos un error por no haberse creado el asiento
         $this->toolBox()->i18nLog()->warning('record-save-error');
-        $this->toolBox()->i18nLog()->warning('Revise si nos falta por crear alguna variable para este asiento predefinido');
+        $this->toolBox()->i18nLog()->warning('Revise si la cantidad de variables usadas en pestaña Variables coincide con las variables usadas en pestaña Líneas. O revise que ha puesto valor a todas las variables de la pestaña Generar.');
     }
 
     protected function loadData($viewName, $view)
