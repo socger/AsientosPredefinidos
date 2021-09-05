@@ -302,8 +302,13 @@ printf('$' . count($subcuentas));
                 if ($conVariable[$i] <> 'Z') {
                     $sinVariable .= $form['var_' . $caracter];
                 } else {
-                    settype($resultado, "string"); // Convertimos $resultado en un string
-                    $sinVariable .= $resultado;
+                    if ($tipoSinVariable <> 'S') {
+                        settype($resultado, "string"); // Convertimos $resultado en un string
+                        $sinVariable .= $resultado;
+                    } else {
+                        $mensajeError = 'En la subucuenta ' . $conVariable . ' ha usado la variable Z que sirve para devolver el descuadre del asiento a crear. Pero sólo se puede usar esta variable en Debe/Haber.'; 
+                        return false;
+                    }
                 }
                 
                 continue;
