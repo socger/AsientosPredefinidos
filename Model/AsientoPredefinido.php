@@ -198,9 +198,9 @@ class AsientoPredefinido extends ModelClass
             $newLine->codsubcuenta = $subcuenta;
             
             $newLine->idsubcuenta = $this->getIdSubcuenta($asiento->codejercicio, $subcuenta);
-//            if (empty($newLine->idsubcuenta)) {
-//                printf($newLine->idsubcuenta . ' ... para el ejercicio ' . $asiento->codejercicio . ', el codigo de subcuenta ' . $subcuenta . ' no existe');
-//            }
+// if (empty($newLine->idsubcuenta)) {
+//     printf($newLine->idsubcuenta . ' ... para el ejercicio ' . $asiento->codejercicio . ', el codigo de subcuenta ' . $subcuenta . ' no existe');
+// }
             
             $newLine->concepto = $line->concepto;
             $newLine->debe = $debe;
