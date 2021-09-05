@@ -23,6 +23,7 @@ use FacturaScripts\Core\Base\DataBase\DataBaseWhere;
 use FacturaScripts\Core\Model\Base\ModelClass;
 use FacturaScripts\Core\Model\Base\ModelTrait;
 use FacturaScripts\Dinamic\Model\Asiento;
+use FacturaScripts\Dinamic\Model\Subcuenta;
 
 class AsientoPredefinido extends ModelClass
 {
@@ -52,7 +53,7 @@ class AsientoPredefinido extends ModelClass
         for ($i = 0; $i < strlen($caracteresAceptados); $i++) {
             if ($caracteresAceptados[$i] <> 'Z') { // La Z ... NO ES UNA VARIABLE a crear su valor en pestaña Generar de Asientos Predefinidos, AUNQUE se usará para poner el valor del descuadre del asiento
                 $existeEnArray = false;
-                foreach ($array as &$valor) {
+                foreach ($array as $valor) {
                     if ($valor === $caracteresAceptados[$i]) {
                         $existeEnArray = true;
                         break;
@@ -82,17 +83,17 @@ class AsientoPredefinido extends ModelClass
         
         // Contamos la cantidad de variables usadas en pestaña Variables de Asientos Predefinidos
         foreach ($variables as $variable) {
-            if ($variable['codigo'] <> 'Z') { // La Z ... NO ES UNA VARIABLE a crear su valor en pestaña Generar de Asientos Predefinidos, AUNQUE se usará para poner el valor del descuadre del asiento
+            if ($variable->codigo <> 'Z') { // La Z ... NO ES UNA VARIABLE a crear su valor en pestaña Generar de Asientos Predefinidos, AUNQUE se usará para poner el valor del descuadre del asiento
                 $existeEnArray = false;
-                foreach ($variablesEnVariables as &$valor) {
-                    if ($valor === $variable['codigo']) {
+                foreach ($variablesEnVariables as $valor) {
+                    if ($valor === $variable->codigo) {
                         $existeEnArray = true;
                         break;
                     }
                 }
                 
                 if ($existeEnArray === false) {
-                    $variablesEnVariables[] = $variable['codigo'];
+                    $variablesEnVariables[] = $variable->codigo;
                 }
             }
         }
@@ -101,11 +102,11 @@ class AsientoPredefinido extends ModelClass
         if ( count($variablesEnLineas) <> count($variablesEnVariables) ) {
             $aDevolver = false;
         }
-        
+
         return $aDevolver;
     }
 
-    public function generate(array $form): Asiento
+    public function generate(array $form, string &$mensajeError): Asiento
     {
         $asiento = new Asiento(); // Creamos un modelo asiento
 
@@ -115,7 +116,9 @@ class AsientoPredefinido extends ModelClass
         
         
         if (false === $asiento->save()) {
-            // No se pudo crear la cabecera del asiento, así que devolvemos el asiento incompleto
+            $mensajeError = 'No se pudo crear la cabecera del asiento.';
+
+            // Devolvemos el asiento incompleto
             return $asiento;
         }
 
@@ -126,6 +129,9 @@ class AsientoPredefinido extends ModelClass
         // Luego comprobaremos la cantidad de variables creadas (pestaña Generar del asiento predefinido)
         // Ambas cantidades debe de ser igual, además debemos de comprobar si todas las variables tienen su valor introducido para el asiento que vamos acrear
         if ($this->checkLinesWithVariables($variables, $lines) === false) {
+            $mensajeError = 'Sin contar la variable Z (Descuadre del asiento), en la pestaña de Lineas hay más variables a usar que las que se han creado en la pestaña Variables.'; 
+
+            // Devolvemos el asiento incompleto
             $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
             return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
         }
@@ -137,6 +143,8 @@ class AsientoPredefinido extends ModelClass
             // Creamos la subcuenta sustituyendo las variables que tuviera por su valor
             $subcuenta = '';
             if ($this->varLineReplace($subcuenta, $line->codsubcuenta, $form, $variables) === false) {
+                $mensajeError = 'En la subucuenta ' . $subcuenta . ' hay variables que todavía no se han creado en la pestaña Variables.'; 
+                
                 // Hay variables que todavía no se han creado para la subcuenta
                 $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
                 return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
@@ -145,13 +153,16 @@ class AsientoPredefinido extends ModelClass
             // Creamos el debe sustituyendo las variables que tuviera por su valor
             $debe = '';
             if ($this->varLineReplace($debe, $line->debe, $form, $variables) === false) {
+                $mensajeError = 'En el DEBE de la subucuenta ' . $subcuenta . ' hay variables que todavía no se han creado en la pestaña Variables.'; 
+                
                 // Hay variables que todavía no se han creado para la subcuenta
                 $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
                 return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
             }
             
+/*            
             try {
-                eval('$debe = ' . $debe . ';'); // Por si en $line->debe había una fórmula
+                eval('$debe = '. $debe.';'); // Por si en $line->debe había una fórmula
             } catch (Exception $e) {
                 // echo 'Excepción capturada: ',  $e->getMessage(), "\n";
 
@@ -159,15 +170,19 @@ class AsientoPredefinido extends ModelClass
                 $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
                 return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
             }
+*/
             
             // Creamos el haber sustituyendo las variables que tuviera por su valor
             $haber = '';
             if ($this->varLineReplace($haber, $line->haber, $form, $variables) === false) {
+                $mensajeError = 'En el HABER de la subucuenta ' . $subcuenta . ' hay variables que todavía no se han creado en la pestaña Variables.'; 
+                
                 // Hay variables que todavía no se han creado para la subcuenta
                 $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
                 return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
             }
             
+/*            
             try {
                 eval('$haber = ' . $haber . ';'); // Por si en $line->haber había una fórmula
             } catch (Exception $e) {
@@ -177,14 +192,23 @@ class AsientoPredefinido extends ModelClass
                 $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
                 return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
             }
+*/
             
             // Una vez calculados bien los valores con variables, los asignamos a la línea
             $newLine->codsubcuenta = $subcuenta;
+            
+            $newLine->idsubcuenta = $this->getIdSubcuenta($asiento->codejercicio, $subcuenta);
+//            if (empty($newLine->idsubcuenta)) {
+//                printf($newLine->idsubcuenta . ' ... para el ejercicio ' . $asiento->codejercicio . ', el codigo de subcuenta ' . $subcuenta . ' no existe');
+//            }
+            
             $newLine->concepto = $line->concepto;
             $newLine->debe = $debe;
             $newLine->haber = $haber;
             
             if (false === $newLine->save()) {
+                $mensajeError = 'No se pudo grabar la línea del asiento con la subucuenta ' . $subcuenta; 
+                
                 // No se pudo grabar la línea
                 $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
                 return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
@@ -192,6 +216,50 @@ class AsientoPredefinido extends ModelClass
         }
 
         return $asiento;
+    }
+
+    public function getIdSubcuenta(string $codejercicio, string $codcuenta): int
+    {
+        /*
+printf('   ' . $codejercicio . ' ... ' . $codcuenta);
+        
+        $modelSubcuenta = new Subcuenta();
+        $where = [
+            new DataBaseWhere("codejercicio", $codejercicio),
+            new DataBaseWhere("codcuenta", $codcuenta),
+        ];
+        
+        $subcuentas = $modelSubcuenta->all($where);
+        
+        $idSubcuenta = 0;
+
+printf('$' . count($subcuentas));
+        foreach ($subcuentas as $subcuenta) {
+            $idSubcuenta = $subcuenta->idsubcuenta;
+        }
+        
+        return $idSubcuenta; 
+        * 
+        */
+        
+        $idSubcuenta = 0;
+        
+        $sql = ' SELECT subcuentas.idsubcuenta '
+             . ' FROM subcuentas '
+             . ' WHERE subcuentas.codejercicio = "' . $codejercicio . '"' 
+             . ' AND subcuentas.codsubcuenta =  "' . $codcuenta . '"' 
+        ;
+
+        $registros = self::$dataBase->select($sql); // Para entender su funcionamiento visitar ... https://facturascripts.com/publicaciones/acceso-a-la-base-de-datos-818
+
+        foreach ($registros as $fila) {
+            $idSubcuenta = $fila['idsubcuenta'];
+        }
+
+// printf($sql);
+//printf('   ' . $codejercicio . ' ... ' . $codcuenta . ' ... ' . $idSubcuenta);
+
+        return $idSubcuenta; 
     }
 
     public function getLines(): array
@@ -241,7 +309,7 @@ class AsientoPredefinido extends ModelClass
             $caracter = preg_replace("/[^A-Z\s]/", "", $conVariable[$i]); // Sólo permitimos letras en mayúsculas
             if (strlen($caracter) <= 0) {
                 // No es una variable, así que añadimos el caracter como parte de la subcuenta
-                $sinVariable .= $caracter;
+                $sinVariable .= $conVariable[$i];
                 continue;
             }
 
@@ -249,7 +317,7 @@ class AsientoPredefinido extends ModelClass
             // Pero antes tenemos que recorrer todas las variables para ver si está creada, si no lo estuviera sacar mensaje de ello
             $laVariableExiste = false;
             foreach ($variables as $variable) {
-                if ($caracter === $variable['codigo']) {
+                if ($conVariable[$i] === $variable->codigo) {
                     $laVariableExiste = true;
                     break;
                 }
