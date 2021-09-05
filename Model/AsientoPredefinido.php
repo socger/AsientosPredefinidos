@@ -136,63 +136,37 @@ class AsientoPredefinido extends ModelClass
             return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
         }
         
+        $saldo = (float) 0;
+        
         // Recorremos todas las líneas/partidas del asiento predefinido para crearlas en el asiento que estamos creando
         foreach ($lines as $line) {
             $newLine = $asiento->getNewLine(); // Crea la línea pero con los campos vacíos
             
             // Creamos la subcuenta sustituyendo las variables que tuviera por su valor
             $subcuenta = '';
-            if ($this->varLineReplace($subcuenta, $line->codsubcuenta, $form, $variables) === false) {
-                $mensajeError = 'En la subucuenta ' . $subcuenta . ' hay variables que todavía no se han creado en la pestaña Variables.'; 
-                
-                // Hay variables que todavía no se han creado para la subcuenta
+            if ($this->varLineReplace($saldo, 'S', $subcuenta, $line->codsubcuenta, $form, $variables, $mensajeError) === false) {
+                // Hay variables que todavía no se han creado
                 $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
                 return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
             }
             
             // Creamos el debe sustituyendo las variables que tuviera por su valor
             $debe = '';
-            if ($this->varLineReplace($debe, $line->debe, $form, $variables) === false) {
-                $mensajeError = 'En el DEBE de la subucuenta ' . $subcuenta . ' hay variables que todavía no se han creado en la pestaña Variables.'; 
-                
-                // Hay variables que todavía no se han creado para la subcuenta
+            if ($this->varLineReplace($saldo, 'D', $debe, $line->debe, $form, $variables, $mensajeError) === false) {
+                // Hay variables que todavía no se han creado
                 $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
                 return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
             }
-            
-/*            
-            try {
-                eval('$debe = '. $debe.';'); // Por si en $line->debe había una fórmula
-            } catch (Exception $e) {
-                // echo 'Excepción capturada: ',  $e->getMessage(), "\n";
-
-                // No se pudo modificar el valor del Debe
-                $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
-                return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
-            }
-*/
             
             // Creamos el haber sustituyendo las variables que tuviera por su valor
             $haber = '';
-            if ($this->varLineReplace($haber, $line->haber, $form, $variables) === false) {
-                $mensajeError = 'En el HABER de la subucuenta ' . $subcuenta . ' hay variables que todavía no se han creado en la pestaña Variables.'; 
-                
-                // Hay variables que todavía no se han creado para la subcuenta
+            if ($this->varLineReplace($saldo, 'H', $haber, $line->haber, $form, $variables, $mensajeError) === false) {
+                // Hay variables que todavía no se han creado
                 $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
                 return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
             }
             
-/*            
-            try {
-                eval('$haber = ' . $haber . ';'); // Por si en $line->haber había una fórmula
-            } catch (Exception $e) {
-                // echo 'Excepción capturada: ',  $e->getMessage(), "\n";
-
-                // No se pudo modificar el valor del Haber
-                $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
-                return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
-            }
-*/
+            $saldo = floatval($saldo) + (floatval($debe) - floatval($haber));
             
             // Una vez calculados bien los valores con variables, los asignamos a la línea
             $newLine->codsubcuenta = $subcuenta;
@@ -302,7 +276,7 @@ printf('$' . count($subcuentas));
         return parent::url($type, $list);
     }
     
-    protected function varLineReplace(string &$sinVariable, string $conVariable, array $form, array $variables): bool
+    protected function varLineReplace( float $resultado, string $tipoSinVariable, string &$sinVariable, string $conVariable, array $form, array $variables, string &$mensajeError): bool
     {
         // Recorremos cada uno de los caracteres para ver si es variable o no
         for ($i = 0; $i < strlen($conVariable); $i++) {
@@ -316,18 +290,37 @@ printf('$' . count($subcuentas));
             // Es una variable, así que sustituimos el caracter por el valor de la variable que tenemos en $form
             // Pero antes tenemos que recorrer todas las variables para ver si está creada, si no lo estuviera sacar mensaje de ello
             $laVariableExiste = false;
+            
             foreach ($variables as $variable) {
-                if ($conVariable[$i] === $variable->codigo) {
+                if ( $conVariable[$i] === $variable->codigo or $conVariable[$i] === 'Z' ) {
                     $laVariableExiste = true;
                     break;
                 }
             }
 
             if ($laVariableExiste === true) {
-                $sinVariable .= $form['var_' . $caracter];
+                if ($conVariable[$i] <> 'Z') {
+                    $sinVariable .= $form['var_' . $caracter];
+                } else {
+                    settype($resultado, "string"); // Convertimos $resultado en un string
+                    $sinVariable .= $resultado;
+                }
+                
                 continue;
             }
             
+            switch ($tipoSinVariable) { // $tipoSinVariable sólo puede valer 'S', 'D' ó 'H'
+                case 'S':
+                    $mensajeError = 'En la subucuenta ' . $conVariable; 
+
+                case 'D':
+                    $mensajeError = 'En el DEBE de la subucuenta ' . $conVariable; 
+                    
+                case 'H':
+                    $mensajeError = 'En el HABER de la subucuenta ' . $conVariable; 
+            }
+            
+            $mensajeError .= ' hay variables que todavía no se han creado en la pestaña Variables.'; 
             return false; // Salimos sin terminar de sustituir las variables
         }
 
