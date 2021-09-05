@@ -276,7 +276,7 @@ printf('$' . count($subcuentas));
         return parent::url($type, $list);
     }
     
-    protected function varLineReplace( float $resultado, string $tipoSinVariable, string &$sinVariable, string $conVariable, array $form, array $variables, string &$mensajeError): bool
+    protected function varLineReplace( float $saldo, string $tipoSinVariable, string &$sinVariable, string $conVariable, array $form, array $variables, string &$mensajeError): bool
     {
         // Recorremos cada uno de los caracteres para ver si es variable o no
         for ($i = 0; $i < strlen($conVariable); $i++) {
@@ -303,8 +303,8 @@ printf('$' . count($subcuentas));
                     $sinVariable .= $form['var_' . $caracter];
                 } else {
                     if ($tipoSinVariable <> 'S') {
-                        settype($resultado, "string"); // Convertimos $resultado en un string
-                        $sinVariable .= $resultado;
+                        settype($saldo, "string"); // Convertimos $resultado en un string
+                        $sinVariable .= $saldo;
                     } else {
                         $mensajeError = 'En la subucuenta ' . $conVariable . ' ha usado la variable Z que sirve para devolver el descuadre del asiento a crear. Pero sólo se puede usar esta variable en Debe/Haber.'; 
                         return false;
@@ -328,6 +328,12 @@ printf('$' . count($subcuentas));
             $mensajeError .= ' hay variables que todavía no se han creado en la pestaña Variables.'; 
             return false; // Salimos sin terminar de sustituir las variables
         }
+        
+//        if ($tipoSinVariable <> 'S') {
+//            $resultado = floatval($sinVariable);
+//            settype($resultado, "string"); // Convertimos $resultado en un string
+//            $sinVariable = $resultado;
+//        }
 
         return true;
     }
