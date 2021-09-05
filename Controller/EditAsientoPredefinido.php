@@ -105,7 +105,8 @@ class EditAsientoPredefinido extends EditController
             return;
         }
 
-        $asiento = $this->getModel()->generate($form); // Llamamos al método generate() del modelo AsientoPredefinido.php, pero le pasamos todo el contenido del form
+        $mensajeError = '';
+        $asiento = $this->getModel()->generate($form, $mensajeError); // Llamamos al método generate() del modelo AsientoPredefinido.php, pero le pasamos todo el contenido del form
         
         if ($asiento->exists()) {
             // Se ha creado el siento, así que sacamos mensaje, esperamos un segundo y saltamos a la dirección del asiento recién creado.
@@ -117,7 +118,7 @@ class EditAsientoPredefinido extends EditController
 
         // Presentamos un error por no haberse creado el asiento
         $this->toolBox()->i18nLog()->warning('record-save-error');
-        $this->toolBox()->i18nLog()->warning('Revise si la cantidad de variables usadas en pestaña Variables coincide con las variables usadas en pestaña Líneas. O revise que ha puesto valor a todas las variables de la pestaña Generar.');
+        $this->toolBox()->i18nLog()->warning($mensajeError);
     }
 
     protected function loadData($viewName, $view)
