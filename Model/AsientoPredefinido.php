@@ -23,7 +23,9 @@ use FacturaScripts\Core\Base\DataBase\DataBaseWhere;
 use FacturaScripts\Core\Model\Base\ModelClass;
 use FacturaScripts\Core\Model\Base\ModelTrait;
 use FacturaScripts\Dinamic\Model\Asiento;
-use FacturaScripts\Dinamic\Model\Subcuenta;
+// use FacturaScripts\Dinamic\Model\Subcuenta;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+
 
 class AsientoPredefinido extends ModelClass
 {
@@ -71,14 +73,20 @@ class AsientoPredefinido extends ModelClass
         $saldoDebe = 0.0;
         $saldoHaber = 0.0;
         
+        $expressionLanguage = new ExpressionLanguage(); // Esta línea me da un error y el uses lo tengo tal y como nos dice https://symfony.com/doc/current/components/expression_language.html
+        
         // Recorremos todas las líneas/partidas del asiento predefinido para crearlas en el asiento que estamos creando
         foreach ($lines as $line) {
             $newLine = $asiento->getNewLine(); // Crea la línea pero con los campos vacíos
             
             // Creamos la subcuenta sustituyendo las variables que tuviera por su valor
             $codsubcuenta = $this->varLineReplace($line->codsubcuenta, $variables, $form, $saldoDebe, $saldoHaber);
-            $debe = floatval($this->varLineReplace($line->debe, $variables, $form, $saldoDebe, $saldoHaber));
-            $haber = floatval($this->varLineReplace($line->haber, $variables, $form, $saldoDebe, $saldoHaber));
+
+            // $debe = floatval($this->varLineReplace($line->debe, $variables, $form, $saldoDebe, $saldoHaber));
+            $debe = $expressionLanguage->evaluate( $this->varLineReplace($line->debe, $variables, $form, $saldoDebe, $saldoHaber) );
+
+            // $haber = floatval($this->varLineReplace($line->haber, $variables, $form, $saldoDebe, $saldoHaber));
+            $haber = $expressionLanguage->evaluate( $this->varLineReplace($line->haber, $variables, $form, $saldoDebe, $saldoHaber) );
             
             $saldoDebe += $debe;
             $saldoHaber += $haber;
