@@ -2,6 +2,8 @@
 
 namespace FacturaScripts\Plugins\AsientosPredefinidos;
 
+require_once __DIR__ . '/vendor/autoload.php';
+
 class Init extends \FacturaScripts\Core\Base\InitClass
 {
     public function init()
