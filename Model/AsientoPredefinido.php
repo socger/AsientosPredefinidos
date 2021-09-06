@@ -73,36 +73,28 @@ class AsientoPredefinido extends ModelClass
         $saldoDebe = 0.0;
         $saldoHaber = 0.0;
         
-        $expressionLanguage = new ExpressionLanguage(); // Esta línea me da un error y el uses lo tengo tal y como nos dice https://symfony.com/doc/current/components/expression_language.html
-        
         // Recorremos todas las líneas/partidas del asiento predefinido para crearlas en el asiento que estamos creando
         foreach ($lines as $line) {
             $newLine = $asiento->getNewLine(); // Crea la línea pero con los campos vacíos
             
             // Creamos la subcuenta sustituyendo las variables que tuviera por su valor
-            $codsubcuenta = $this->varLineReplace($line->codsubcuenta, $variables, $form, $saldoDebe, $saldoHaber);
-
-            // $debe = floatval($this->varLineReplace($line->debe, $variables, $form, $saldoDebe, $saldoHaber));
-            $debe = $expressionLanguage->evaluate( $this->varLineReplace($line->debe, $variables, $form, $saldoDebe, $saldoHaber) );
-
-            // $haber = floatval($this->varLineReplace($line->haber, $variables, $form, $saldoDebe, $saldoHaber));
-            $haber = $expressionLanguage->evaluate( $this->varLineReplace($line->haber, $variables, $form, $saldoDebe, $saldoHaber) );
+            $newLine->codsubcuenta = $this->varLineReplace($line->codsubcuenta, $variables, $form, $saldoDebe, $saldoHaber);
+            $newLine->debe = (float) $this->varLineReplace($line->debe, $variables, $form, $saldoDebe, $saldoHaber);
+            $newLine->haber = (float) $this->varLineReplace($line->haber, $variables, $form, $saldoDebe, $saldoHaber);
             
-            $saldoDebe += $debe;
-            $saldoHaber += $haber;
-            
-            // Una vez calculados bien los valores con variables, los asignamos a la línea
-            $subcuenta = $newLine->getSubcuenta($codsubcuenta);
+            $subcuenta = $newLine->getSubcuenta($newLine->codsubcuenta);
             $newLine->setAccount($subcuenta);
             $newLine->concepto = $line->concepto;
-            $newLine->debe = $debe;
-            $newLine->haber = $haber;
             
             if (false === $newLine->save()) {
                 $this->toolBox()->i18nLog()->warning('No se pudo grabar la línea del asiento con la subucuenta ' . $codsubcuenta);
                 $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
                 return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
             }
+
+            // Recalculamos saldo de asiento
+            $saldoDebe += $newLine->debe;
+            $saldoHaber += $newLine->haber;
         }
 
         $asiento->importe = $saldoDebe; // Asignamos al concepto el campo concepto de la cabecera del asiento predefinido
@@ -112,7 +104,6 @@ class AsientoPredefinido extends ModelClass
             $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
             return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
         }
-
         
         return $asiento;
     }
@@ -249,7 +240,15 @@ class AsientoPredefinido extends ModelClass
         
         $dondeQuitamosVariables = str_replace('Z', $resultado, $dondeQuitamosVariables); // Si es una subcuenta, nunca va a a reemplazar Z, porque ya controlamos en la pestaña Z que no se use si es una subcuenta
         
+        foreach(['+', '-', '/', '*'] as $operator) {
+            if (false !== strpos($dondeQuitamosVariables, $operator) ) {
+                $expressionLanguage = new ExpressionLanguage();
+                return (string) $expressionLanguage->evaluate($dondeQuitamosVariables);
+            }
+        }
+        
         return $dondeQuitamosVariables;
+        
     }
     
 }
