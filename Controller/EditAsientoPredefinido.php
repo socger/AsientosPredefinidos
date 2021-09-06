@@ -116,6 +116,8 @@ class EditAsientoPredefinido extends EditController
             return;
         }
 
+        // quitar este log, lo puede mostrar el modelo directamente
+
         // Presentamos un error por no haberse creado el asiento
         $this->toolBox()->i18nLog()->warning('record-save-error');
         $this->toolBox()->i18nLog()->warning($mensajeError);
