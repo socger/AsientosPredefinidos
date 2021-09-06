@@ -45,7 +45,7 @@ class AsientoPredefinido extends ModelClass
      */
     public $id;
 
-    public function generate(array $form, string &$mensajeError): Asiento
+    public function generate(array $form): Asiento
     {
         $asiento = new Asiento(); // Creamos un modelo asiento
         $asiento->idempresa = $form["idempresa"]; // Rellenamos al asiento el idempresa del form
@@ -53,10 +53,8 @@ class AsientoPredefinido extends ModelClass
         $asiento->concepto = $this->concepto; // Asignamos al concepto el campo concepto de la cabecera del asiento predefinido
         
         if (false === $asiento->save()) {
-            $mensajeError = 'No se pudo crear la cabecera del asiento.';
-
-            // Devolvemos el asiento incompleto
-            return $asiento;
+            $this->toolBox()->i18nLog()->warning('no-can-create-accounting-entry');
+            return $asiento; // Devolvemos el asiento incompleto, vacío.
         }
 
         $variables = $this->getVariables(); // Traemos en un array todas las variables creadas para el asiento predefinido.
@@ -66,45 +64,49 @@ class AsientoPredefinido extends ModelClass
         // Luego comprobaremos la cantidad de variables creadas (pestaña Generar del asiento predefinido)
         // Ambas cantidades debe de ser igual, además debemos de comprobar si todas las variables tienen su valor introducido para el asiento que vamos acrear
         if ($this->checkLinesWithVariables($variables, $lines) === false) {
-            $mensajeError = 'Sin contar la variable Z (Descuadre del asiento), en la pestaña de Lineas hay más variables a usar que las que se han creado en la pestaña Variables.'; 
-
-            // Devolvemos el asiento incompleto
+            $this->toolBox()->i18nLog()->warning('not-equal-variables');
             $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
-            return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
+            return $asiento; // Devolvemos el asiento vacío y no continua creando sus líneas
         }
         
-        $saldo = 0.0;
+        $saldoDebe = 0.0;
+        $saldoHaber = 0.0;
         
         // Recorremos todas las líneas/partidas del asiento predefinido para crearlas en el asiento que estamos creando
         foreach ($lines as $line) {
             $newLine = $asiento->getNewLine(); // Crea la línea pero con los campos vacíos
             
             
+            $mensajeError = '';
+            
             // Creamos la subcuenta sustituyendo las variables que tuviera por su valor
-            $codsubcuenta = '';
-            if ($this->varLineReplace($saldo, 'S', $codsubcuenta, $line->codsubcuenta, $form, $variables, $mensajeError) === false) {
-                // Hay variables que todavía no se han creado
+            $codsubcuenta = $line->codsubcuenta;
+            if ($this->varLineReplace($saldoDebe, $saldoHaber, $form, $variables, $codsubcuenta) === false) {
+                $this->toolBox()->i18nLog()->warning('En la subucuenta ' . $line->codsubcuenta .' hay variables que todavía no se han creado en la pestaña Variables.');
                 $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
                 return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
             }
             
             // Creamos el debe sustituyendo las variables que tuviera por su valor
-            $debe = 0.0;
-            if ($this->varLineReplace($saldo, 'D', $debe, $line->debe, $form, $variables, $mensajeError) === false) {
-                // Hay variables que todavía no se han creado
+            $debe = $line->debe;
+            if ($this->varLineReplace($saldoDebe, $saldoHaber, $form, $variables, $debe) === false) {
+                $this->toolBox()->i18nLog()->warning('En el DEBE(' . $line->debe . ') de la subucuenta ' . $line->codsubcuenta .' hay variables que todavía no se han creado en la pestaña Variables.');
                 $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
                 return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
             }
+            $debe = floatval($debe);
             
             // Creamos el haber sustituyendo las variables que tuviera por su valor
-            $haber = 0.0;
-            if ($this->varLineReplace($saldo, 'H', $haber, $line->haber, $form, $variables, $mensajeError) === false) {
-                // Hay variables que todavía no se han creado
+            $haber = $line->haber;
+            if ($this->varLineReplace($saldoDebe, $saldoHaber, $form, $variables, $haber) === false) {
+                $this->toolBox()->i18nLog()->warning('En el HABER(' . $line->haber . ') de la subucuenta ' . $line->codsubcuenta .' hay variables que todavía no se han creado en la pestaña Variables.');
                 $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
                 return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
             }
+            $haber = floatval($haber);
             
-            $saldo += $debe - $haber;
+            $saldoDebe += $debe;
+            $saldoHaber += $haber;
             
             // Una vez calculados bien los valores con variables, los asignamos a la línea
             $subcuenta = $newLine->getSubcuenta($codsubcuenta);
@@ -114,12 +116,18 @@ class AsientoPredefinido extends ModelClass
             $newLine->haber = $haber;
             
             if (false === $newLine->save()) {
-                $mensajeError = 'No se pudo grabar la línea del asiento con la subucuenta ' . $codsubcuenta; 
-                
-                // No se pudo grabar la línea
+                $this->toolBox()->i18nLog()->warning('No se pudo grabar la línea del asiento con la subucuenta ' . $codsubcuenta);
                 $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
                 return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
             }
+        }
+
+        $asiento->importe = $saldoDebe; // Asignamos al concepto el campo concepto de la cabecera del asiento predefinido
+        
+        if (false === $asiento->save()) {
+            $this->toolBox()->i18nLog()->warning('No se pudo actualizar el campo importe del asiento');
+            $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
+            return $asiento; // Devolvemos el asiento vacío y no continua creandole líneas
         }
 
         
@@ -223,76 +231,25 @@ class AsientoPredefinido extends ModelClass
         return count($variablesEnLineas) === count($variablesEnVariables);
     }
     
-    protected function varLineReplace( float $saldo, string $tipoSinVariable, string &$sinVariable, string $conVariable, array $form, array $variables, string &$mensajeError): bool
+    protected function varLineReplace(float $saldoDebe, float $saldoHaber, array $form, array $variables, string &$dondeQuitamosVariables): bool
     {
-        /**
-         * A reemplazar
-        foreach($variables as $var) {
-            $remplazar = str_replace($var->codigo, $form['var_'.$var->codigo], $reemplazar);
-        }
-
-        $remplazar = str_replace('Z', $saldo, $reemplazar);
-        */
-
-        // Recorremos cada uno de los caracteres para ver si es variable o no
-        for ($i = 0; $i < strlen($conVariable); $i++) {
-            $caracter = preg_replace("/[^A-Z\s]/", "", $conVariable[$i]); // Sólo permitimos letras en mayúsculas
-            if (strlen($caracter) <= 0) {
-                // No es una variable, así que añadimos el caracter como parte de la subcuenta
-                $sinVariable .= $conVariable[$i];
-                continue;
-            }
-
-            // Es una variable, así que sustituimos el caracter por el valor de la variable que tenemos en $form
-            // Pero antes tenemos que recorrer todas las variables para ver si está creada, si no lo estuviera sacar mensaje de ello
-            $laVariableExiste = false;
-            
-            foreach ($variables as $variable) {
-                if ( $conVariable[$i] === $variable->codigo or $conVariable[$i] === 'Z' ) {
-                    $laVariableExiste = true;
-                    break;
-                }
-            }
-
-            if ($laVariableExiste === true) {
-                if ($conVariable[$i] <> 'Z') {
-                    $sinVariable .= $form['var_' . $caracter];
-                } else if ($tipoSinVariable <> 'S') {
-                        settype($saldo, "string"); // Convertimos $resultado en un string
-                        $sinVariable .= $saldo;
-                } else {
-                        $mensajeError = 'En la subucuenta ' . $conVariable . ' ha usado la variable Z que sirve para devolver el descuadre del asiento a crear. Pero sólo se puede usar esta variable en Debe/Haber.'; 
-                        return false;
-                }
-                
-                continue;
-            }
-            
-            switch ($tipoSinVariable) { // $tipoSinVariable sólo puede valer 'S', 'D' ó 'H'
-                case 'S':
-                    $mensajeError = 'En la subucuenta ' . $conVariable; 
-                    break;
-
-                case 'D':
-                    $mensajeError = 'En el DEBE de la subucuenta ' . $conVariable; 
-                    break;
-                    
-                case 'H':
-                    $mensajeError = 'En el HABER de la subucuenta ' . $conVariable; 
-                    break;
-            }
-            
-            $mensajeError .= ' hay variables que todavía no se han creado en la pestaña Variables.'; 
-            return false; // Salimos sin terminar de sustituir las variables
-        }
+        $aDevolver = true;
         
-//        if ($tipoSinVariable <> 'S') {
-//            $resultado = floatval($sinVariable);
-//            settype($resultado, "string"); // Convertimos $resultado en un string
-//            $sinVariable = $resultado;
-//        }
+        foreach($variables as $var) {
+            $dondeQuitamosVariables = str_replace($var->codigo, $form['var_'.$var->codigo], $dondeQuitamosVariables);
+        }
 
-        return true;
+        $resultado = $saldoDebe - $saldoHaber;
+        settype($resultado, "string"); // Convertimos $resultado en un string
+        
+        $dondeQuitamosVariables = str_replace('Z', $resultado, $dondeQuitamosVariables); // Si es una subcuenta, nunca va a a reemplazar Z, porque ya controlamos en la pestaña Z que no se use si es una subcuenta
+        
+        $hayVariablesTodavia = preg_replace("/[^A-Z\s]/", "", $dondeQuitamosVariables); // Dejamos sólo las variables A-Z, si las hubiera
+        if (strlen($hayVariablesTodavia) > 0) {
+            $aDevolver = false; // Hay variables todavía ... no se crearon todas las variables para el asiento predefinido en pestaña Variables 
+        }
+
+        return $aDevolver;
     }
-
+    
 }
