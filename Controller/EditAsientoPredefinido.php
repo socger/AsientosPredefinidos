@@ -84,18 +84,6 @@ class EditAsientoPredefinido extends EditController
          parent::execAfterAction($action);
     }
     
-/*    
-    protected function execPreviousAction($action)
-    {
-        if ($action === 'gen-accounting') {
-            $this->generateAccountingAction();
-            return false; // No continuamos con la carga de datos
-        }
-
-         parent::execPreviousAction($action);
-    }
-*/
-
     protected function generateAccountingAction()
     {
         $form = $this->request->request->all(); // Nos traemos todos los campos del form de la vista AsientoPredefinidoGenerar.html.twig
@@ -105,22 +93,16 @@ class EditAsientoPredefinido extends EditController
             return;
         }
 
-        $mensajeError = '';
-        $asiento = $this->getModel()->generate($form, $mensajeError); // Llamamos al método generate() del modelo AsientoPredefinido.php, pero le pasamos todo el contenido del form
+        $asiento = $this->getModel()->generate($form); // Llamamos al método generate() del modelo AsientoPredefinido.php, pero le pasamos todo el contenido del form
         
         if ($asiento->exists()) {
             // Se ha creado el siento, así que sacamos mensaje, esperamos un segundo y saltamos a la dirección del asiento recién creado.
-            $this->toolBox()->i18nLog()->info('generated-accounting-entries', ['%quantity%' => 1]);
+            $this->toolBox()->i18nLog()->info('generated-accounting-entries', ['%quantity%' => 2]);
             $this->redirect($asiento->url(), 1); // El parámetro 1 es un temporizador en redireccionar, así el usuario ve el mensaje de la línea anterior
 
             return;
         }
-
-        // quitar este log, lo puede mostrar el modelo directamente
-
-        // Presentamos un error por no haberse creado el asiento
-        $this->toolBox()->i18nLog()->warning('record-save-error');
-        $this->toolBox()->i18nLog()->warning($mensajeError);
+        
     }
 
     protected function loadData($viewName, $view)
