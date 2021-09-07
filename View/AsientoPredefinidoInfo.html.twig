@@ -32,10 +32,12 @@
 
             <br><br>Bien, ahora vayamos a crear una subcuenta con una variable, por ejemplo si introducimos 4300000A significaría que a la hora de generar un asiento desde este Asiento Predefinido, nos preguntaría el asistente los dígitos que faltaran para completar la subcuenta, guardandolos en la variable A. Por lo que la partida donde estuviera esta subucuenta, si le introducimos 99 a la Variable A, nos crearía la subcuenta 430000099 en la generación del asiento. Pero una cosa a tener en cuenta es que FacturaScripts no nos va a permitir crear variables en minúsculas, ni tampoco más de una variable para una subcuenta.
             <br><br>Para subcuenta por ejemplo se permitiría ...
+            <br>430.A ... al generar el asiento el punto sería sustituido por tantos 0 como necesitara para completar la longitud de la subcuenta
             <br>4300000A
             <br>4300000C                        
 
             <br><br>No se permitiría ...
+            <br>430..A ... mas de un . no se permite.
             <br>430000AB ... más de una variable
             <br>4300000Z  ... Z variable sólo para Debe/Haber
             <br>43000000 ... no se permiten signos ni caracteres que no sean letras de la A-Z 4300000 ... no se permiten minúsculas en las variables.
