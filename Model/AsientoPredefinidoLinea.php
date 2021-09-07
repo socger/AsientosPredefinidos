@@ -137,7 +137,7 @@ class AsientoPredefinidoLinea extends ModelClass
     private function comprobarSubcuenta(string $codsubcuenta) : bool {
         $aDevolver = true;
 
-        // Dejamos sólo los caracteres aceptados ... números(0-9) y letras en mayúsculas (A-Z)
+        // Dejamos sólo los caracteres aceptados ... números(0-9), letras en mayúsculas (A-Z) y el signo "."
         $caracteresAceptados = preg_replace("/[^A-Z0-9.\s]/", "", $codsubcuenta);
 
         // Comprobamos si introdujo algún caracter no admitido
@@ -172,6 +172,17 @@ class AsientoPredefinidoLinea extends ModelClass
             $aDevolver = false;
             $this->toolBox()->i18nLog()->error('Para la subcuenta introdujo ' . $codsubcuenta . '. Pero la subcuenta no puede tener más de una variable (letras en mayúsculas A-Z)');
         }
+        
+        // Comprobamos que no hubiera más de un signo "."
+        $pos = strpos($codsubcuenta, '.'); // $pos = 7, no 0        
+        if ($pos !== false) {
+            // Encontremos un punto, vamos a ver si hay más
+            $pos = strpos($codsubcuenta, '.', ($pos + 1));
+            if ($pos !== false) {
+                $aDevolver = false;
+                $this->toolBox()->i18nLog()->error('Para la subcuenta introdujo ' . $codsubcuenta . ". Pero la subcuenta no puede tener más de un signo punto ('.')");
+            }        
+        }        
         
         return $aDevolver;
     }
