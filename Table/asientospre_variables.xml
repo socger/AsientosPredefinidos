@@ -42,11 +42,6 @@
         <name>mensaje</name>
         <type>character varying(255)</type>
     </column>
-    <column>
-        <name>tipo</name>
-        <type>character varying(1)</type>
-        <null>NO</null>
-    </column>
 
         
     <constraint>
