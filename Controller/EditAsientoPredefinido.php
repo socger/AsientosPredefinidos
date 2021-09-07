@@ -25,11 +25,17 @@ use FacturaScripts\Core\Lib\ExtendedController\EditController;
 class EditAsientoPredefinido extends EditController
 {
 
+    /**
+     * @return string
+     */
     public function getModelClassName()
     {
         return "AsientoPredefinido";
     }
 
+    /**
+     * @return array
+     */
     public function getPageData()
     {
         $pageData = parent::getPageData();
@@ -42,38 +48,52 @@ class EditAsientoPredefinido extends EditController
     protected function createViews()
     {
         parent::createViews();
-        
+
         $this->createViewsInfo();
         $this->createViewsLineas();
         $this->createViewsVariables();
         $this->createViewsGenerar();
-        
+
         $this->setTabsPosition('bottom'); // Las posiciones de las pestañas pueden ser left, top, bottom
     }
-    
-    protected function createViewsGenerar(string $viewName = 'Generar') {
-        $this->addHtmlView($viewName, 'AsientoPredefinidoGenerar', 'AsientoPredefinido', 'generate', 'fas fa-magic');
 
-//        $this->addEditListView($viewName, 'AsientoPredefinidoVariable', 'generate', 'fas fa-magic');
-//        $this->views[$viewName]->setInLine(true);
+    /**
+     * @param string $viewName
+     */
+    protected function createViewsGenerar(string $viewName = 'Generar')
+    {
+        $this->addHtmlView($viewName, 'AsientoPredefinidoGenerar', 'AsientoPredefinido', 'generate', 'fas fa-magic');
     }
 
-    protected function createViewsInfo(string $viewName = 'Info') {
+    /**
+     * @param string $viewName
+     */
+    protected function createViewsInfo(string $viewName = 'Info')
+    {
         $this->addHtmlView($viewName, 'AsientoPredefinidoInfo', 'AsientoPredefinido', 'help', 'fas fa-info-circle');
     }
 
+    /**
+     * @param string $viewName
+     */
     protected function createViewsLineas(string $viewName = 'EditAsientoPredefinidoLinea')
     {
         $this->addEditListView($viewName, 'AsientoPredefinidoLinea', 'lines');
         $this->views[$viewName]->setInLine(true);
     }
 
+    /**
+     * @param string $viewName
+     */
     protected function createViewsVariables(string $viewName = 'EditAsientoPredefinidoVariable')
     {
         $this->addEditListView($viewName, 'AsientoPredefinidoVariable', 'variables', 'fas fa-tools');
         $this->views[$viewName]->setInLine(true);
     }
 
+    /**
+     * @param string $action
+     */
     protected function execAfterAction($action)
     {
         if ($action === 'gen-accounting') {
@@ -81,46 +101,43 @@ class EditAsientoPredefinido extends EditController
             return;
         }
 
-         parent::execAfterAction($action);
+        parent::execAfterAction($action);
     }
-    
+
     protected function generateAccountingAction()
     {
         $form = $this->request->request->all(); // Nos traemos todos los campos del form de la vista AsientoPredefinidoGenerar.html.twig
-        
-        if ( empty($form["fecha"]) || empty($form["idempresa"]) ) {
-            $this->toolBox()->i18nLog()->error('No ha introducido ni la empresa, ni la fecha');
+        if (empty($form["fecha"]) || empty($form["idempresa"])) {
+            $this->toolBox()->i18nLog()->warning('No ha introducido ni la empresa, ni la fecha');
             return;
         }
 
         $asiento = $this->getModel()->generate($form); // Llamamos al método generate() del modelo AsientoPredefinido.php, pero le pasamos todo el contenido del form
-        
         if ($asiento->exists()) {
             // Se ha creado el siento, así que sacamos mensaje, esperamos un segundo y saltamos a la dirección del asiento recién creado.
-            $this->toolBox()->i18nLog()->info('generated-accounting-entries', ['%quantity%' => 2]);
+            $this->toolBox()->i18nLog()->notice('generated-accounting-entries', ['%quantity%' => 1]);
             $this->redirect($asiento->url(), 1); // El parámetro 1 es un temporizador en redireccionar, así el usuario ve el mensaje de la línea anterior
-
             return;
         }
-        
+
+        $this->toolBox()->i18nLog()->warning('generated-accounting-entries', ['%quantity%' => 0]);
     }
 
     protected function loadData($viewName, $view)
     {
+        $id = $this->getViewModelValue($this->getMainViewName(), 'id');
+
         switch ($viewName) {
             case 'EditAsientoPredefinidoLinea':
-                $idasientopre = $this->getViewModelValue($this->getMainViewName(), 'id');
-                $where = [new DataBaseWhere('idasientopre', $idasientopre)];
+                $where = [new DataBaseWhere('idasientopre', $id)];
                 $view->loadData('', $where, ['orden' => 'ASC', 'idasientopre' => 'ASC']);
                 break;
-            
+
             case 'EditAsientoPredefinidoVariable':
-                $idasientopre = $this->getViewModelValue($this->getMainViewName(), 'id');
-                $where = [new DataBaseWhere('idasientopre', $idasientopre)];
+                $where = [new DataBaseWhere('idasientopre', $id)];
                 $view->loadData('', $where, ['idasientopre' => 'ASC', 'codigo' => 'ASC']);
-                
                 break;
-            
+
             default:
                 parent::loadData($viewName, $view);
                 break;
