@@ -23,7 +23,7 @@ use FacturaScripts\Core\Base\DataBase\DataBaseWhere;
 use FacturaScripts\Core\Model\Base\ModelClass;
 use FacturaScripts\Core\Model\Base\ModelTrait;
 use FacturaScripts\Dinamic\Model\Asiento;
-// use FacturaScripts\Dinamic\Model\Subcuenta;
+use FacturaScripts\Dinamic\Model\Subcuenta;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 
@@ -47,6 +47,12 @@ class AsientoPredefinido extends ModelClass
      */
     public $id;
 
+    protected function transformSubcta(string $subCta): string
+    {
+        $subcuenta = new Subcuenta();
+        return $subcuenta->transformCodsubcuenta($subCta);
+    }
+    
     public function generate(array $form): Asiento
     {
         // Creamos modelo asiento y rellenamos sus campos
@@ -82,8 +88,9 @@ class AsientoPredefinido extends ModelClass
             $newLine->debe = (float) $this->varLineReplace($line->debe, $variables, $form, $saldoDebe, $saldoHaber);
             $newLine->haber = (float) $this->varLineReplace($line->haber, $variables, $form, $saldoDebe, $saldoHaber);
             
-            $subcuenta = $newLine->getSubcuenta($newLine->codsubcuenta);
+            $subcuenta = $newLine->getSubcuenta( $this->transformSubcta($newLine->codsubcuenta) );
             $newLine->setAccount($subcuenta);
+            
             $newLine->concepto = $line->concepto;
             
             if (false === $newLine->save()) {
