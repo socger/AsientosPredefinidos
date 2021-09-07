@@ -138,7 +138,7 @@ class AsientoPredefinidoLinea extends ModelClass
         $aDevolver = true;
 
         // Dejamos sólo los caracteres aceptados ... números(0-9) y letras en mayúsculas (A-Z)
-        $caracteresAceptados = preg_replace("/[^A-Z0-9\s]/", "", $codsubcuenta);
+        $caracteresAceptados = preg_replace("/[^A-Z0-9.\s]/", "", $codsubcuenta);
 
         // Comprobamos si introdujo algún caracter no admitido
         if (strlen($caracteresAceptados) <> strlen($codsubcuenta)) {
