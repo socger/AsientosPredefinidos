@@ -217,7 +217,7 @@ class AsientoPredefinido extends ModelClass
         foreach ($form as $clave => $valor) {
             $clave = str_replace('var_', "", $clave);
 
-            if (empty($valor) or $valor === '0') {
+            if (empty($valor) || $valor === '0') {
                 $mensaje .= ($mensaje === '') ? $clave : ', ' . $clave;
             }
         }
@@ -241,18 +241,23 @@ class AsientoPredefinido extends ModelClass
 
         // Contamos la cantidad de variables usadas en pestaña Variables de Asientos Predefinidos
         foreach ($variables as $variable) {
-            if ($variable->codigo <> 'Z') { // La Z ... NO ES UNA VARIABLE a crear su valor en pestaña Generar de Asientos Predefinidos, AUNQUE se usará para poner el valor del descuadre del asiento
-                $existeEnArray = false;
-                foreach ($variablesEnVariables as $valor) {
-                    if ($valor === $variable->codigo) {
-                        $existeEnArray = true;
-                        break;
-                    }
+            // Z no es variable creada desde pestaña Generar de Asientos Predefinidos
+            // AUNQUE se usa para poner el valor del descuadre del asiento en pestaña Lineas
+            if ($variable->codigo === 'Z') {
+                continue; 
+            }
+            
+            // Para el resto de variables que no son Z
+            $existeEnArray = false;
+            foreach ($variablesEnVariables as $valor) {
+                if ($valor === $variable->codigo) {
+                    $existeEnArray = true;
+                    break;
                 }
+            }
 
-                if ($existeEnArray === false) {
-                    $variablesEnVariables[] = $variable->codigo;
-                }
+            if ($existeEnArray === false) {
+                $variablesEnVariables[] = $variable->codigo;
             }
         }
 
