@@ -46,11 +46,6 @@ class AsientoPredefinidoVariable extends ModelClass
      */
     public $mensaje;
     
-    /**
-     * @var string
-     */
-    public $tipo;
-    
     public static function primaryColumn()
     {
         return "id";
@@ -66,7 +61,6 @@ class AsientoPredefinidoVariable extends ModelClass
         $utils = $this->toolBox()->utils();
         $this->codigo = $utils->noHtml($this->codigo);
         $this->mensaje = $utils->noHtml($this->mensaje);
-        $this->tipo = $this->toolBox()->utils()->noHtml($this->tipo);
         
         return parent::test();
     }
