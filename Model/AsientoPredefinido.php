@@ -70,8 +70,8 @@ class AsientoPredefinido extends ModelClass
 
         // Comprobamos las variables y líneas
         if (false === $this->checkVariables($form, $variables, $lines)) {
-            $asiento->delete(); // Borramos todo el asiento, incluidas las líneas que se hubieran generado correctamente
-            return $asiento; // Devolvemos el asiento vacío y no continua creando sus líneas
+            $asiento->delete(); // Borramos el asiento, incluidas las líneas que se hubieran generado correctamente
+            return $asiento; // Devolvemos el asiento vacío y no continúa creando sus líneas
         }
 
         $saldoDebe = 0.0;
@@ -79,15 +79,14 @@ class AsientoPredefinido extends ModelClass
 
         // Recorremos todas las líneas/partidas del asiento predefinido para crearlas en el asiento que estamos creando
         foreach ($lines as $line) {
-            $newLine = $asiento->getNewLine(); // Crea la línea pero con los campos vacíos
-
+            $newLine = $asiento->getNewLine(); // Crea la partida, con los campos vacíos
             $newLine->concepto = $line->concepto;
-            $newLine->debe = (float)$this->varLineReplace($asiento->codejercicio, 'N', $line->debe, $variables, $form, $saldoDebe, $saldoHaber);
-            $newLine->haber = (float)$this->varLineReplace($asiento->codejercicio, 'N', $line->haber, $variables, $form, $saldoDebe, $saldoHaber);
-            
+            $newLine->debe = (float)$this->varLineReplace($line->debe, $variables, $form, $saldoDebe, $saldoHaber);
+            $newLine->haber = (float)$this->varLineReplace($line->haber, $variables, $form, $saldoDebe, $saldoHaber);
+
             // Reemplazamos/Calculamos la subcuenta del asiento y su id
-            $newLine->codsubcuenta = $this->varLineReplace($asiento->codejercicio, 'S', $line->codsubcuenta, $variables, $form, $saldoDebe, $saldoHaber);
-            $newLine->setAccount( $newLine->getSubcuenta($newLine->codsubcuenta) ); // setAccount, asigna subcuenta y idsubcuenta a la partida/línea
+            $newLine->codsubcuenta = $this->varLineReplace($line->codsubcuenta, $variables, $form, $saldoDebe, $saldoHaber, 'S', $asiento->getExercise());
+            $newLine->setAccount($newLine->getSubcuenta($newLine->codsubcuenta)); // setAccount, asigna subcuenta y idsubcuenta a la partida/línea
 
             // Guardamos la línea
             if (false === $newLine->save()) {
@@ -102,7 +101,7 @@ class AsientoPredefinido extends ModelClass
         }
 
         // Rellenamos el campo Importe de cabecera del asiento
-        $asiento->importe = $saldoDebe; 
+        $asiento->importe = $saldoDebe;
         if (false === $asiento->save()) {
             $this->toolBox()->i18nLog()->warning('record-save-error');
             $asiento->delete();
@@ -175,10 +174,10 @@ class AsientoPredefinido extends ModelClass
     }
 
     /**
-     * @param string $toCheck
-     * @param array $list
-     * 
      * Calcula/añade en &$array las variables que encuentre en $toCheck
+     *
+     * @param string $toCheck
+     * @param array $array
      */
     protected function addToVariables(string $toCheck, array &$array)
     {
@@ -203,12 +202,13 @@ class AsientoPredefinido extends ModelClass
     }
 
     /**
+     * Comprobamos que todas las variables tengan valor y que ctdad.variables pestaña Lineas = ctdad.variables pestaña Variables del Asiento Predefinido
+     *
      * @param array $form
      * @param array $variables
      * @param array $lines
      *
      * @return bool
-     * Comprobamos que todas las variables tengan valor y que ctdad.variables pestaña Lineas = ctdad.variables pestaña Variables del Asiento Predefinido
      */
     protected function checkVariables(array $form, array $variables, array $lines): bool
     {
@@ -216,9 +216,8 @@ class AsientoPredefinido extends ModelClass
         $mensaje = '';
         foreach ($form as $clave => $valor) {
             $clave = str_replace('var_', "", $clave);
-
             if (empty($valor) || $valor === '0') {
-                $mensaje .= ($mensaje === '') ? $clave : ', ' . $clave;
+                $mensaje .= empty($mensaje) ? $clave : ', ' . $clave;
             }
         }
 
@@ -244,9 +243,9 @@ class AsientoPredefinido extends ModelClass
             // Z no es variable creada desde pestaña Generar de Asientos Predefinidos
             // AUNQUE se usa para poner el valor del descuadre del asiento en pestaña Lineas
             if ($variable->codigo === 'Z') {
-                continue; 
+                continue;
             }
-            
+
             // Para el resto de variables que no son Z
             $existeEnArray = false;
             foreach ($variablesEnVariables as $valor) {
@@ -261,80 +260,72 @@ class AsientoPredefinido extends ModelClass
             }
         }
 
-        // Es ctdad variables pestaña Lineas = ctdad variables pestaña Lineas
-        //$aDevolver = count($variablesEnLineas) === count($variablesEnVariables) ? $this->toolBox()->i18nLog()->warning('not-equal-variables') : null;
-        $aDevolver = count($variablesEnLineas) === count($variablesEnVariables);
-
-        if ($aDevolver === false) {
+        // Es ctdad variables pestaña Lineas = ctdad variables pestaña Lineas?
+        if (count($variablesEnLineas) !== count($variablesEnVariables)) {
             $this->toolBox()->i18nLog()->warning('not-equal-variables');
+            return false;
         }
 
-        return $aDevolver;
+        return true;
     }
 
-
     /**
-     * @param string $codejercicio
-     * @param string $tipo
-     * @param string $dondeQuitamosVariables
+     * Reemplazamos variables de A-Y, por valor almacenado en $form
+     * Reemplazamos variable Z por el descuadre del asiento
+     * Si es subcuenta, sustituimos el punto por tantos 0 hasta longitud subcuenta, según ejercicio
+     * Si es una fórmula, calculamos
+     *
+     * @param string $value
      * @param array $variables
      * @param array $form
      * @param float $saldoDebe
      * @param float $saldoHaber
-
+     * @param string $tipo
+     * @param ?Ejercicio $ejercicio
+     *
      * @return string
-     * 
-     * Reemplazamos variables de A-Y, por valor
-     * Reemplazamos variable Z por saldo descuadre asiento
-     * Si es subcuenta, sustituimos el punto por tantos 0 hasta longitud subcuenta, según ejercicio
-     * Si es una fórmula, calculamos
      */
-    protected function varLineReplace(string $codejercicio, string $tipo, string $dondeQuitamosVariables, array $variables, array $form, float $saldoDebe, float $saldoHaber): string
+    protected function varLineReplace(string $value, array $variables, array $form, float $saldoDebe, float $saldoHaber, string $tipo = 'N', ?Ejercicio $ejercicio = null): string
     {
         // Reemplazamos variables de A-Y, por valor
         foreach ($variables as $var) {
-            $dondeQuitamosVariables = str_replace($var->codigo, $form['var_' . $var->codigo], $dondeQuitamosVariables);
+            $value = str_replace($var->codigo, $form['var_' . $var->codigo], $value);
         }
 
-        // Reemplazamos variable Z por saldo descuadre asiento
-        $resultado = (string)($saldoDebe - $saldoHaber);
-
-        $dondeQuitamosVariables = str_replace('Z', $resultado, $dondeQuitamosVariables); // Si es una subcuenta, nunca va a a reemplazar Z, porque ya controlamos en la pestaña Z que no se use si es una subcuenta
-        
         // Si es subcuenta, sustituimos el punto por tantos 0 hasta longitud subcuenta, según ejercicio
-        if ($tipo === 'S'){
-            if (\strpos($dondeQuitamosVariables, '.') === false) {
+        if ($tipo === 'S') {
+            if (strpos($value, '.') === false) {
                 // No hay punto
-                $dondeQuitamosVariables = \trim($dondeQuitamosVariables);
-            } else {
-                // Hay punto
-                $parts = \explode('.', \trim($dondeQuitamosVariables));
-                if (\count($parts) === 2) {
-                    // Sólo hay un punto
-                    $ejercicio = new Ejercicio();
-                    if ($ejercicio->loadFromCode($codejercicio)) {
-                        $dondeQuitamosVariables = \str_pad( $parts[0]
-                                                          , $ejercicio->longsubcuenta - \strlen($parts[1])
-                                                          , '0'
-                                                          , \STR_PAD_RIGHT
-                                                          ) . $parts[1];
-                    } 
-                } else {
-                    // Hay más de un punto
-                    $dondeQuitamosVariables = \trim($dondeQuitamosVariables);
-                }
+                return trim($value);
             }
+
+            // Hay punto, sustituimos por ceros
+            $parts = explode('.', trim($value));
+            if (count($parts) === 2) {
+                // Solamente hay un punto
+                return str_pad($parts[0]
+                        , $ejercicio->longsubcuenta - strlen($parts[1])
+                        , '0'
+                        , STR_PAD_RIGHT
+                    ) . $parts[1];
+            }
+
+            // Hay más de un punto
+            return trim($value);
         }
-        
+
+        // Reemplazamos variable Z por el descuadre del asiento
+        $descuadre = $saldoDebe - $saldoHaber;
+        $value = str_replace('Z', (string)$descuadre, $value);
+
         // Si es una fórmula, calculamos
         foreach (['+', '-', '/', '*'] as $operator) {
-            if (false !== strpos($dondeQuitamosVariables, $operator)) {
+            if (false !== strpos($value, $operator)) {
                 $expressionLanguage = new ExpressionLanguage();
-                return (string)$expressionLanguage->evaluate($dondeQuitamosVariables);
+                return (string)$expressionLanguage->evaluate($value);
             }
         }
-        
-        return $dondeQuitamosVariables;
-    }
 
+        return $value;
+    }
 }

@@ -31,12 +31,6 @@ class AsientoPredefinidoLinea extends ModelClass
      */
     public $codsubcuenta;
 
-//    /**
-//     * @var string
-//     */
-//    public $codcontrapartida;
-//
-    
     /**
      * @var string
      */
@@ -70,26 +64,24 @@ class AsientoPredefinidoLinea extends ModelClass
     public function clear()
     {
         parent::clear();
-        // $this->debe = '0';
-        // $this->haber = '0';
         $this->orden = 0;
     }
-    
-    private function comprobarCantidad(string $codsubcuenta, string $cantidad, string $debe_Haber): bool 
+
+    private function comprobarCantidad(string $codsubcuenta, string $cantidad, string $debe_Haber): bool
     {
         $aDevolver = true;
-        
+
         // Recorremos todos los caracteres para comprobar si hay caracteres no admitidos
         $contadorVariables = 0;
         $hayCaracteresNoAdmitidos = 0;
         $hayFormulasIncorrectas = 0;
         // $hayVariableZ = 0;
         $haySignosFormula = 0;
-        
+
         // Comprobamos cada uno de los caracteres para ver si lo admitimos
         for ($i = 0; $i < strlen($cantidad); $i++) {
             $esCaracterNoAdmitido = true;
-            
+
             // Comprobamos si es 
             $arraySignos = array("+", "-", "/", "*");
             if (in_array($cantidad[$i], $arraySignos)) {
@@ -109,8 +101,8 @@ class AsientoPredefinidoLinea extends ModelClass
                         $this->toolBox()->i18nLog()->error('Para el ' . $debe_Haber . ' de la subcuenta ' . $codsubcuenta . ' introdujo el signo ' . $cantidad[$i] . ' sin una variable después.');
                     }
                 }
-            }            
-            
+            }
+
             $variable = preg_replace("/[^A-Z\s]/", "", $cantidad[$i]); // Sólo permitimos letras en mayúsculas
             if (strlen($variable) > 0) {
                 $esCaracterNoAdmitido = false;
@@ -126,7 +118,7 @@ class AsientoPredefinidoLinea extends ModelClass
             $aDevolver = false;
             $this->toolBox()->i18nLog()->error('Para el ' . $debe_Haber . ' de la subcuenta ' . $codsubcuenta . ' introdujo ' . $cantidad . '. Pero sólo pueden tener variables (A-Z) y signos para cálculos (+ - / *)');
         }
-        
+
         if ($hayFormulasIncorrectas > 0) {
             $aDevolver = false;
         }
@@ -134,7 +126,8 @@ class AsientoPredefinidoLinea extends ModelClass
         return $aDevolver;
     }
 
-    private function comprobarSubcuenta(string $codsubcuenta) : bool {
+    private function comprobarSubcuenta(string $codsubcuenta): bool
+    {
         $aDevolver = true;
 
         // Dejamos sólo los caracteres aceptados ... números(0-9), letras en mayúsculas (A-Z) y el signo "."
@@ -145,18 +138,18 @@ class AsientoPredefinidoLinea extends ModelClass
             $aDevolver = false;
             $this->toolBox()->i18nLog()->error('Para la subcuenta introdujo ' . $codsubcuenta . '. Pero la subcuenta sólo puede tener números(0-9) ó letras en mayúsculas (A-Z)');
         }
-        
+
         // Recorremos todos los caracteres admitidos para ver si hay más de una variable y para ver si han usado la variable Z (es variable de resultados (descuadre del asiento)
         $contadorVariables = 0;
         $hayVariableZ = 0;
-        
+
         for ($i = 0; $i < strlen($caracteresAceptados); $i++) {
-            
+
             $variable = preg_replace("/[^A-Z\s]/", "", $caracteresAceptados[$i]); // Sólo permitimos letras en mayúsculas
             if (strlen($variable) > 0) {
                 $contadorVariables .= 1;
             }
-            
+
             if ($variable === 'Z') {
                 $hayVariableZ .= 1;
             }
@@ -166,13 +159,13 @@ class AsientoPredefinidoLinea extends ModelClass
             $aDevolver = false;
             $this->toolBox()->i18nLog()->error('Para la subcuenta introdujo ' . $codsubcuenta . '. Pero la subcuenta no puede tener la variable Z (DESCUADRE del asiento)');
         }
-        
+
 
         if ($contadorVariables > 1) {
             $aDevolver = false;
             $this->toolBox()->i18nLog()->error('Para la subcuenta introdujo ' . $codsubcuenta . '. Pero la subcuenta no puede tener más de una variable (letras en mayúsculas A-Z)');
         }
-        
+
         // Comprobamos que no hubiera más de un signo "."
         $pos = strpos($codsubcuenta, '.'); // $pos = 7, no 0        
         if ($pos !== false) {
@@ -181,9 +174,9 @@ class AsientoPredefinidoLinea extends ModelClass
             if ($pos !== false) {
                 $aDevolver = false;
                 $this->toolBox()->i18nLog()->error('Para la subcuenta introdujo ' . $codsubcuenta . ". Pero la subcuenta no puede tener más de un signo punto ('.')");
-            }        
-        }        
-        
+            }
+        }
+
         return $aDevolver;
     }
 
@@ -202,21 +195,21 @@ class AsientoPredefinidoLinea extends ModelClass
         if ($this->comprobarSubcuenta($this->codsubcuenta) === false) {
             return false;
         }
-        
+
         if ($this->comprobarCantidad($this->codsubcuenta, $this->debe, "DEBE") === false) {
             return false;
         }
-        
+
         if ($this->comprobarCantidad($this->codsubcuenta, $this->haber, 'HABER') === false) {
             return false;
         }
-        
+
         $utils = $this->toolBox()->utils();
         $this->codsubcuenta = $utils->noHtml($this->codsubcuenta);
         $this->concepto = $utils->noHtml($this->concepto);
         $this->debe = $this->toolBox()->utils()->noHtml($this->debe);
         $this->haber = $this->toolBox()->utils()->noHtml($this->haber);
-        
+
         return parent::test();
     }
 }
