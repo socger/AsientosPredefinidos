@@ -295,7 +295,7 @@ class AsientoPredefinido extends ModelClass
         // Si es subcuenta, sustituimos el punto por tantos 0 hasta longitud subcuenta, según ejercicio
         if ($tipo === 'S') {
             if (strpos($value, '.') === false) {
-                // No hay punto
+                // No hay punto y es subcuenta. No hay que cálcular fórmulas, ni sustituir variable Z
                 return trim($value);
             }
 
