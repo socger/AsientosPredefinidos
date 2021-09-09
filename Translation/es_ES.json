@@ -1,4 +1,6 @@
 {
     "predefined-acc-entries": "Asientos predefinidos",
-    "predefined-acc-entry": "Asiento predefinido"
+    "predefined-acc-entry": "Asiento predefinido",
+    "no-can-create-accounting-entry": "No se pudo crear la cabecera del asiento",
+    "not-equal-variables": "Sin contar la variable Z (Descuadre del asiento), en la pestaña de Lineas hay más variables a usar que las que se han creado en la pestaña Variables."
 }
