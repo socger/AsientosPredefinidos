@@ -185,16 +185,10 @@ class AsientoPredefinido extends ModelClass
         $caracteresAceptados = preg_replace("/[^A-Z\s]/", "", $toCheck);
 
         for ($i = 0; $i < strlen($caracteresAceptados); $i++) {
-            if ($caracteresAceptados[$i] <> 'Z') { // La Z ... NO ES UNA VARIABLE a crear su valor en pestaña Generar de Asientos Predefinidos, AUNQUE se usará para poner el valor del descuadre del asiento
-                $existeEnArray = false;
-                foreach ($array as $valor) {
-                    if ($valor === $caracteresAceptados[$i]) {
-                        $existeEnArray = true;
-                        break;
-                    }
-                }
-
-                if ($existeEnArray === false) {
+            if ($caracteresAceptados[$i] <> 'Z') { 
+                // Z->NO ES VARIABLE a usar en pestaña Generar(Asientos Predef)
+                // AUNQUE se usará para poner saldo descuadre asiento
+                if (true !== in_array($caracteresAceptados[$i], $array)) {
                     $array[] = $caracteresAceptados[$i];
                 }
             }
@@ -247,15 +241,7 @@ class AsientoPredefinido extends ModelClass
             }
 
             // Para el resto de variables que no son Z
-            $existeEnArray = false;
-            foreach ($variablesEnVariables as $valor) {
-                if ($valor === $variable->codigo) {
-                    $existeEnArray = true;
-                    break;
-                }
-            }
-
-            if ($existeEnArray === false) {
+            if (true !== in_array($variable->codigo, $variablesEnVariables)) {
                 $variablesEnVariables[] = $variable->codigo;
             }
         }
@@ -265,7 +251,7 @@ class AsientoPredefinido extends ModelClass
             $this->toolBox()->i18nLog()->warning('not-equal-variables');
             return false;
         }
-
+        
         return true;
     }
 
