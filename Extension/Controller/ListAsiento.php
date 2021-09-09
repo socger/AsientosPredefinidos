@@ -27,6 +27,10 @@ class ListAsiento
     {
         return function () {
             $this->createViewsAsientosPredefinidos();
+            
+            // Esto es para añadir un filtro en la pestaña ListAsiento
+            $asientosPre = $this->codeModel->all('asientospre', 'id', 'descripcion');
+            $this->addFilterSelect('ListAsiento', 'idasientopre', 'predefined-acc-entries', 'idasientopre', $asientosPre);
         };
     }
 
