@@ -59,6 +59,8 @@ class AsientoPredefinido extends ModelClass
         $asiento->idempresa = $form["idempresa"];
         $asiento->setDate($form["fecha"]);
         $asiento->concepto = $this->concepto;
+        $asiento->idasientopre = $this->id;
+        
         if (false === $asiento->save()) {
             $this->toolBox()->i18nLog()->warning('no-can-create-accounting-entry');
             return $asiento; // Devolvemos el asiento incompleto, vacío.
@@ -185,12 +187,10 @@ class AsientoPredefinido extends ModelClass
         $caracteresAceptados = preg_replace("/[^A-Z\s]/", "", $toCheck);
 
         for ($i = 0; $i < strlen($caracteresAceptados); $i++) {
-            if ($caracteresAceptados[$i] <> 'Z') { 
+            if ($caracteresAceptados[$i] <> 'Z' && true !== in_array($caracteresAceptados[$i], $array)){ 
                 // Z->NO ES VARIABLE a usar en pestaña Generar(Asientos Predef)
                 // AUNQUE se usará para poner saldo descuadre asiento
-                if (true !== in_array($caracteresAceptados[$i], $array)) {
-                    $array[] = $caracteresAceptados[$i];
-                }
+                $array[] = $caracteresAceptados[$i];
             }
         }
     }
