@@ -116,7 +116,7 @@ class EditAsientoPredefinido extends EditController
         if ($asiento->exists()) {
             // Se ha creado el siento, así que sacamos mensaje, esperamos un segundo y saltamos a la dirección del asiento recién creado.
             $this->toolBox()->i18nLog()->notice('generated-accounting-entries', ['%quantity%' => 1]);
-            $this->redirect($asiento->url(), 1); // El parámetro 1 es un temporizador en redireccionar, así el usuario ve el mensaje de la línea anterior
+            $this->redirect($asiento->url()."&action=save-ok", 1); // ."&action=save-ok" es para que saque un mensaje de que registro creado ok y el parámetro 1 es un temporizador en redireccionar, así el usuario ve el mensaje de la línea anterior
             return;
         }
 
