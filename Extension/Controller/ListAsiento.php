@@ -27,7 +27,7 @@ class ListAsiento
     {
         return function () {
             $this->createViewsAsientosPredefinidos();
-            
+
             // Esto es para añadir un filtro en la pestaña ListAsiento
             $asientosPre = $this->codeModel->all('asientospre', 'id', 'descripcion');
             $this->addFilterSelect('ListAsiento', 'idasientopre', 'predefined-acc-entries', 'idasientopre', $asientosPre);
@@ -37,11 +37,10 @@ class ListAsiento
     protected function createViewsAsientosPredefinidos()
     {
         return function (string $viewName = 'ListAsientoPredefinido') {
-            $this->addView($viewName, 'AsientoPredefinido', 'predefined-acc-entries', 'fas fa-cogs');
+            $this->addView($viewName, 'AsientoPredefinido', 'predefined-acc-entries', 'fas fa-blender');
             $this->addOrderBy($viewName, ["id"], "code");
             $this->addOrderBy($viewName, ["descripcion"], "description", 1);
-            $this->addSearchFields($viewName, ["id", "descripcion"]);
+            $this->addSearchFields($viewName, ["id", "concepto", "descripcion"]);
         };
     }
-
 }

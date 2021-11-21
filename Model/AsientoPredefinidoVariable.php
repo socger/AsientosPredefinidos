@@ -46,21 +46,35 @@ class AsientoPredefinidoVariable extends ModelClass
      */
     public $mensaje;
 
+    /**
+     * @return string
+     */
     public static function primaryColumn()
     {
         return "id";
     }
 
+    /**
+     * @return string
+     */
     public static function tableName()
     {
         return "asientospre_variables";
     }
 
+    /**
+     * @return bool
+     */
     public function test()
     {
         $utils = $this->toolBox()->utils();
-        $this->codigo = $utils->noHtml($this->codigo);
+        $this->codigo = strtoupper($utils->noHtml($this->codigo));
         $this->mensaje = $utils->noHtml($this->mensaje);
+
+        if ($this->codigo === 'Z') {
+            self::toolBox()::i18nLog()->warning('No es necesario registrar la variable Z.');
+            return false;
+        }
 
         return parent::test();
     }

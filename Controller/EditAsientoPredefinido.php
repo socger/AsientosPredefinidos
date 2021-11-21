@@ -41,7 +41,7 @@ class EditAsientoPredefinido extends EditController
         $pageData = parent::getPageData();
         $pageData["title"] = "predefined-acc-entry";
         $pageData["menu"] = "accounting";
-        $pageData["icon"] = "fas fa-cogs";
+        $pageData["icon"] = "fas fa-blender";
         return $pageData;
     }
 
@@ -54,7 +54,8 @@ class EditAsientoPredefinido extends EditController
         $this->createViewsVariables();
         $this->createViewsGenerar();
 
-        $this->setTabsPosition('bottom'); // Las posiciones de las pestañas pueden ser left, top, bottom
+        $this->setTabsPosition('bottom');
+        // Las posiciones de las pestañas pueden ser left, top, bottom
     }
 
     /**
@@ -112,15 +113,18 @@ class EditAsientoPredefinido extends EditController
             return;
         }
 
-        $asiento = $this->getModel()->generate($form); // Llamamos al método generate() del modelo AsientoPredefinido.php, pero le pasamos todo el contenido del form
+        // Llamamos al método generate() del modelo AsientoPredefinido y le pasamos el form
+        $asiento = $this->getModel()->generate($form);
         if ($asiento->exists()) {
             // Se ha creado el siento, así que sacamos mensaje, esperamos un segundo y saltamos a la dirección del asiento recién creado.
             $this->toolBox()->i18nLog()->notice('generated-accounting-entries', ['%quantity%' => 1]);
-            $this->redirect($asiento->url()."&action=save-ok", 1); // ."&action=save-ok" es para que saque un mensaje de que registro creado ok y el parámetro 1 es un temporizador en redireccionar, así el usuario ve el mensaje de la línea anterior
+            $this->redirect($asiento->url() . "&action=save-ok", 1);
+            // ."&action=save-ok" es para que saque un mensaje de que registro creado ok y el parámetro 1
+            // es un temporizador en redireccionar, así el usuario ve el mensaje de la línea anterior
             return;
         }
 
-        $this->toolBox()->i18nLog()->warning('generated-accounting-entries', ['%quantity%' => 0]);
+        $this->toolBox()->i18nLog()->warning('record-save-error');
     }
 
     protected function loadData($viewName, $view)
