@@ -1,8 +1,8 @@
 <?php
 /**
  * This file is part of AsientoPredefinido plugin for FacturaScripts
- * Copyright (C) 2021 Carlos Garcia Gomez            <carlos@facturascripts.com>
- *                    Jeronimo Pedro Sánchez Manzano <socger@gmail.com>
+ * Copyright (C) 2021-2022 Carlos Garcia Gomez            <carlos@facturascripts.com>
+ *                         Jeronimo Pedro Sánchez Manzano <socger@gmail.com>
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
@@ -45,11 +45,6 @@ class AsientoPredefinido extends ModelClass
      */
     public $id;
 
-    /**
-     * @param array $form
-     *
-     * @return Asiento
-     */
     public function generate(array $form): Asiento
     {
         return AsientoPredefinidoGenerator::generate($this, $form);
@@ -79,26 +74,17 @@ class AsientoPredefinido extends ModelClass
         return $variable->all($where);
     }
 
-    /**
-     * @return string
-     */
-    public static function primaryColumn()
+    public static function primaryColumn(): string
     {
         return "id";
     }
 
-    /**
-     * @return string
-     */
-    public static function tableName()
+    public static function tableName(): string
     {
         return "asientospre";
     }
 
-    /**
-     * @return bool
-     */
-    public function test()
+    public function test(): bool
     {
         $utils = $this->toolBox()->utils();
         $this->concepto = $utils->noHtml($this->concepto);
@@ -107,12 +93,6 @@ class AsientoPredefinido extends ModelClass
         return parent::test();
     }
 
-    /**
-     * @param string $type
-     * @param string $list
-     *
-     * @return string
-     */
     public function url(string $type = 'auto', string $list = 'ListAsiento?activetab=List'): string
     {
         return parent::url($type, $list);

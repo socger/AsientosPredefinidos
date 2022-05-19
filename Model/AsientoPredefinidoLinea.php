@@ -1,8 +1,8 @@
 <?php
 /**
  * This file is part of AsientoPredefinido plugin for FacturaScripts
- * Copyright (C) 2021 Carlos Garcia Gomez            <carlos@facturascripts.com>
- *                    Jeronimo Pedro Sánchez Manzano <socger@gmail.com>
+ * Copyright (C) 2021-2022 Carlos Garcia Gomez            <carlos@facturascripts.com>
+ *                         Jeronimo Pedro Sánchez Manzano <socger@gmail.com>
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
@@ -69,26 +69,17 @@ class AsientoPredefinidoLinea extends ModelClass
         $this->orden = 0;
     }
 
-    /**
-     * @return string
-     */
-    public static function primaryColumn()
+    public static function primaryColumn(): string
     {
         return "id";
     }
 
-    /**
-     * @return string
-     */
-    public static function tableName()
+    public static function tableName(): string
     {
         return "asientospre_lineas";
     }
 
-    /**
-     * @return bool
-     */
-    public function test()
+    public function test(): string
     {
         $utils = $this->toolBox()->utils();
         $this->codsubcuenta = $utils->noHtml($this->codsubcuenta);
@@ -102,12 +93,6 @@ class AsientoPredefinidoLinea extends ModelClass
             parent::test();
     }
 
-    /**
-     * @param string $cantidad
-     * @param string $etiqueta
-     *
-     * @return bool
-     */
     private function testCantidad(string &$cantidad, string $etiqueta): bool
     {
         // reemplazamos la coma por punto
@@ -126,11 +111,6 @@ class AsientoPredefinidoLinea extends ModelClass
         return true;
     }
 
-    /**
-     * @param string $codsubcuenta
-     *
-     * @return bool
-     */
     private function testSubcuenta(string $codsubcuenta): bool
     {
         // Dejamos solo los caracteres aceptados ... números(0-9), letras en mayúsculas (A-Z) y el punto

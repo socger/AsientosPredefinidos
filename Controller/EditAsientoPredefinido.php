@@ -1,8 +1,8 @@
 <?php
 /**
  * This file is part of AsientoPredefinido plugin for FacturaScripts
- * Copyright (C) 2021 Carlos Garcia Gomez            <carlos@facturascripts.com>
- *                    Jeronimo Pedro Sánchez Manzano <socger@gmail.com>
+ * Copyright (C) 2021-2022 Carlos Garcia Gomez            <carlos@facturascripts.com>
+ *                         Jeronimo Pedro Sánchez Manzano <socger@gmail.com>
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
@@ -25,18 +25,12 @@ use FacturaScripts\Core\Lib\ExtendedController\EditController;
 class EditAsientoPredefinido extends EditController
 {
 
-    /**
-     * @return string
-     */
-    public function getModelClassName()
+    public function getModelClassName(): string
     {
         return "AsientoPredefinido";
     }
 
-    /**
-     * @return array
-     */
-    public function getPageData()
+    public function getPageData(): array
     {
         $pageData = parent::getPageData();
         $pageData["title"] = "predefined-acc-entry";
@@ -58,43 +52,28 @@ class EditAsientoPredefinido extends EditController
         // Las posiciones de las pestañas pueden ser left, top, bottom
     }
 
-    /**
-     * @param string $viewName
-     */
     protected function createViewsGenerar(string $viewName = 'Generar')
     {
         $this->addHtmlView($viewName, 'AsientoPredefinidoGenerar', 'AsientoPredefinido', 'generate', 'fas fa-magic');
     }
 
-    /**
-     * @param string $viewName
-     */
     protected function createViewsInfo(string $viewName = 'Info')
     {
         $this->addHtmlView($viewName, 'AsientoPredefinidoInfo', 'AsientoPredefinido', 'help', 'fas fa-info-circle');
     }
 
-    /**
-     * @param string $viewName
-     */
     protected function createViewsLineas(string $viewName = 'EditAsientoPredefinidoLinea')
     {
         $this->addEditListView($viewName, 'AsientoPredefinidoLinea', 'lines');
         $this->views[$viewName]->setInLine(true);
     }
 
-    /**
-     * @param string $viewName
-     */
     protected function createViewsVariables(string $viewName = 'EditAsientoPredefinidoVariable')
     {
         $this->addEditListView($viewName, 'AsientoPredefinidoVariable', 'variables', 'fas fa-tools');
         $this->views[$viewName]->setInLine(true);
     }
 
-    /**
-     * @param string $action
-     */
     protected function execAfterAction($action)
     {
         if ($action === 'gen-accounting') {

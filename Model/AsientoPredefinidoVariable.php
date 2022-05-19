@@ -1,8 +1,8 @@
 <?php
 /**
  * This file is part of AsientoPredefinido plugin for FacturaScripts
- * Copyright (C) 2021 Carlos Garcia Gomez            <carlos@facturascripts.com>
- *                    Jeronimo Pedro Sánchez Manzano <socger@gmail.com>
+ * Copyright (C) 2021-2022 Carlos Garcia Gomez            <carlos@facturascripts.com>
+ *                         Jeronimo Pedro Sánchez Manzano <socger@gmail.com>
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
@@ -46,26 +46,17 @@ class AsientoPredefinidoVariable extends ModelClass
      */
     public $mensaje;
 
-    /**
-     * @return string
-     */
-    public static function primaryColumn()
+    public static function primaryColumn(): string
     {
         return "id";
     }
 
-    /**
-     * @return string
-     */
-    public static function tableName()
+    public static function tableName(): string
     {
         return "asientospre_variables";
     }
 
-    /**
-     * @return bool
-     */
-    public function test()
+    public function test(): string
     {
         $utils = $this->toolBox()->utils();
         $this->codigo = strtoupper($utils->noHtml($this->codigo));
