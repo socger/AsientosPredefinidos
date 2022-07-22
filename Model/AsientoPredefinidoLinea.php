@@ -1,8 +1,9 @@
 <?php
 /**
  * This file is part of AsientoPredefinido plugin for FacturaScripts
- * Copyright (C) 2021-2022 Carlos Garcia Gomez            <carlos@facturascripts.com>
- *                         Jeronimo Pedro Sánchez Manzano <socger@gmail.com>
+ * Facturascripts       Copyright (C) 2015-2022 Carlos Garcia Gomez            <carlos@facturascripts.com>
+ * AsientosPredefinidos Copyright (C) 2021-2022 Jeronimo Pedro Sánchez Manzano <socger@gmail.com>
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
@@ -25,6 +26,11 @@ use FacturaScripts\Core\Model\Base\ModelTrait;
 class AsientoPredefinidoLinea extends ModelClass
 {
     use ModelTrait;
+
+    /**
+     * @var string
+     */
+    public $codcontrapartida;
 
     /**
      * @var string
@@ -82,12 +88,14 @@ class AsientoPredefinidoLinea extends ModelClass
     public function test(): string
     {
         $utils = $this->toolBox()->utils();
+        $this->codcontrapartida = $utils->noHtml($this->codcontrapartida);
         $this->codsubcuenta = $utils->noHtml($this->codsubcuenta);
         $this->concepto = $utils->noHtml($this->concepto);
         $this->debe = $this->toolBox()->utils()->noHtml($this->debe);
         $this->haber = $this->toolBox()->utils()->noHtml($this->haber);
 
         return $this->testSubcuenta($this->codsubcuenta) &&
+            $this->testSubcuenta($this->codcontrapartida) &&
             $this->testCantidad($this->debe, 'debe') &&
             $this->testCantidad($this->haber, 'haber') &&
             parent::test();
