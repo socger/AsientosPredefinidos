@@ -1,8 +1,9 @@
 <?php
 /**
  * This file is part of AsientoPredefinido plugin for FacturaScripts
- * Copyright (C) 2021 Carlos Garcia Gomez            <carlos@facturascripts.com>
- *                    Jeronimo Pedro Sánchez Manzano <socger@gmail.com>
+ * Facturascripts       Copyright (C) 2015-2022 Carlos Garcia Gomez            <carlos@facturascripts.com>
+ * AsientoPredefinido   Copyright (C) 2021-2022 Jeronimo Pedro Sánchez Manzano <socger@gmail.com>
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
@@ -22,6 +23,7 @@ namespace FacturaScripts\Plugins\AsientosPredefinidos\Lib;
 use FacturaScripts\Core\Base\DataBase;
 use FacturaScripts\Core\Base\DataBase\DataBaseWhere;
 use FacturaScripts\Core\Base\ToolBox;
+use FacturaScripts\Dinamic\Lib\CodePatterns;
 use FacturaScripts\Dinamic\Model\Asiento;
 use FacturaScripts\Dinamic\Model\Subcuenta;
 use FacturaScripts\Plugins\AsientosPredefinidos\Model\AsientoPredefinido;
@@ -29,6 +31,11 @@ use FacturaScripts\Plugins\AsientosPredefinidos\Model\AsientoPredefinidoLinea;
 use FacturaScripts\Plugins\AsientosPredefinidos\Model\AsientoPredefinidoVariable;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
+/**
+ * Class for generate an accounting entry from template.
+ *
+ * @author Jeronimo Pedro Sánchez Manzano <socger@gmail.com>
+ */
 class AsientoPredefinidoGenerator
 {
     public static function generate(AsientoPredefinido $predefinido, array $form): Asiento
@@ -45,10 +52,10 @@ class AsientoPredefinidoGenerator
         $database = new DataBase();
         $database->beginTransaction();
 
-        $asiento->concepto = $predefinido->concepto;
         $asiento->idasientopre = $predefinido->id;
         $asiento->idempresa = (int)$form["idempresa"];
         $asiento->setDate($form["fecha"]);
+        $asiento->concepto = CodePatterns::trans($predefinido->concepto, $asiento);
         if (false === $asiento->save()) {
             ToolBox::i18nLog()->warning('no-can-create-accounting-entry');
             $database->rollback();
@@ -62,7 +69,7 @@ class AsientoPredefinidoGenerator
         foreach ($lines as $line) {
             // Creamos la partida
             $newLine = $asiento->getNewLine();
-            $newLine->concepto = $line->concepto;
+            $newLine->concepto = CodePatterns::trans($line->concepto, $asiento);
             $newLine->debe = static::cantidadReplace($line->debe, $variables, $form, $saldoDebe, $saldoHaber);
             $newLine->haber = static::cantidadReplace($line->haber, $variables, $form, $saldoDebe, $saldoHaber);
 
