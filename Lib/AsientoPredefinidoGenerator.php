@@ -74,6 +74,17 @@ class AsientoPredefinidoGenerator
                 return $asiento;
             }
 
+            // establecemos la contrapartida
+            if (false === empty($line->codcontrapartida)) {
+                $contrapartida = static::subcuentaReplace($line->codcontrapartida, $variables, $form, $asiento->codejercicio);
+                if (false === $contrapartida->exists()) {
+                    $asiento->delete();
+                    $database->rollback();
+                    return $asiento;
+                }
+                $newLine->setCounterpart($contrapartida);
+            }
+
             // asignamos la subcuenta y guardamos la línea
             $newLine->setAccount($subcuenta);
             if (false === $newLine->save()) {
