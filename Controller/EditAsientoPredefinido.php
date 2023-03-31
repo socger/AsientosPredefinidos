@@ -1,7 +1,7 @@
 <?php
 /**
  * This file is part of AsientoPredefinido plugin for FacturaScripts
- * Copyright (C) 2021-2022 Carlos Garcia Gomez            <carlos@facturascripts.com>
+ * Copyright (C) 2021-2023 Carlos Garcia Gomez            <carlos@facturascripts.com>
  *                         Jeronimo Pedro Sánchez Manzano <socger@gmail.com>
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -24,7 +24,6 @@ use FacturaScripts\Core\Lib\ExtendedController\EditController;
 
 class EditAsientoPredefinido extends EditController
 {
-
     public function getModelClassName(): string
     {
         return "AsientoPredefinido";
@@ -33,8 +32,8 @@ class EditAsientoPredefinido extends EditController
     public function getPageData(): array
     {
         $pageData = parent::getPageData();
-        $pageData["title"] = "predefined-acc-entry";
         $pageData["menu"] = "accounting";
+        $pageData["title"] = "predefined-acc-entry";
         $pageData["icon"] = "fas fa-blender";
         return $pageData;
     }
@@ -42,33 +41,31 @@ class EditAsientoPredefinido extends EditController
     protected function createViews()
     {
         parent::createViews();
+        $this->setTabsPosition('bottom');
 
         $this->createViewsInfo();
+        $this->createViewsGenerar();
         $this->createViewsLineas();
         $this->createViewsVariables();
-        $this->createViewsGenerar();
-
-        $this->setTabsPosition('bottom');
-        // Las posiciones de las pestañas pueden ser left, top, bottom
     }
 
-    protected function createViewsGenerar(string $viewName = 'Generar')
+    protected function createViewsGenerar(string $viewName = 'Generar'): void
     {
         $this->addHtmlView($viewName, 'AsientoPredefinidoGenerar', 'AsientoPredefinido', 'generate', 'fas fa-magic');
     }
 
-    protected function createViewsInfo(string $viewName = 'Info')
+    protected function createViewsInfo(string $viewName = 'Info'): void
     {
         $this->addHtmlView($viewName, 'AsientoPredefinidoInfo', 'AsientoPredefinido', 'help', 'fas fa-info-circle');
     }
 
-    protected function createViewsLineas(string $viewName = 'EditAsientoPredefinidoLinea')
+    protected function createViewsLineas(string $viewName = 'EditAsientoPredefinidoLinea'): void
     {
         $this->addEditListView($viewName, 'AsientoPredefinidoLinea', 'lines');
         $this->views[$viewName]->setInLine(true);
     }
 
-    protected function createViewsVariables(string $viewName = 'EditAsientoPredefinidoVariable')
+    protected function createViewsVariables(string $viewName = 'EditAsientoPredefinidoVariable'): void
     {
         $this->addEditListView($viewName, 'AsientoPredefinidoVariable', 'variables', 'fas fa-tools');
         $this->views[$viewName]->setInLine(true);
@@ -84,7 +81,7 @@ class EditAsientoPredefinido extends EditController
         parent::execAfterAction($action);
     }
 
-    protected function generateAccountingAction()
+    protected function generateAccountingAction(): void
     {
         $form = $this->request->request->all(); // Nos traemos todos los campos del form de la vista AsientoPredefinidoGenerar.html.twig
         if (empty($form["fecha"]) || empty($form["idempresa"])) {
