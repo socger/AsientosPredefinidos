@@ -5,7 +5,10 @@
             <widget type="text" fieldname="id"/>
         </column>
         <column name="description" order="110">
-            <widget type="text" fieldname="descripcion" />
+            <widget type="text" fieldname="descripcion"/>
+        </column>
+        <column name="concept" order="120">
+            <widget type="text" fieldname="concepto"/>
         </column>
     </columns>
 </view>

@@ -1,4 +1,9 @@
 {
+    "config": {
+        "platform": {
+            "php": "7.1.3"
+        }
+    },
     "require": {
         "symfony/expression-language": "^5.3"
     }
