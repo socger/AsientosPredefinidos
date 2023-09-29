@@ -1,8 +1,7 @@
 <?php
 /**
  * This file is part of AsientoPredefinido plugin for FacturaScripts
- * Facturascripts       Copyright (C) 2015-2022 Carlos Garcia Gomez            <carlos@facturascripts.com>
- * AsientoPredefinido   Copyright (C) 2021-2022 Jeronimo Pedro Sánchez Manzano <socger@gmail.com>
+ * Copyright (C) 2021-2023 Carlos Garcia Gomez <carlos@facturascripts.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -32,8 +31,8 @@ use FacturaScripts\Plugins\AsientosPredefinidos\Model\AsientoPredefinidoVariable
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 /**
- * Class for generate an accounting entry from template.
- *
+ * @author Carlos García Gómez <carlos@facturascripts.com>
+ * @author Daniel Fernández Giménez <hola@danielfg.es>
  * @author Jeronimo Pedro Sánchez Manzano <socger@gmail.com>
  */
 class AsientoPredefinidoGenerator
@@ -56,6 +55,7 @@ class AsientoPredefinidoGenerator
         $asiento->idempresa = (int)$form["idempresa"];
         $asiento->setDate($form["fecha"]);
         $asiento->concepto = CodePatterns::trans($predefinido->concepto, $asiento);
+        $asiento->canal = $form["channel"] ?? null;
         if (false === $asiento->save()) {
             ToolBox::i18nLog()->warning('no-can-create-accounting-entry');
             $database->rollback();
