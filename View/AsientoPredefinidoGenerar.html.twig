@@ -4,50 +4,40 @@
         <div class="card-body">
             <div class="form-row">
                 <div class="col-sm-2">
-                    <div class="form-group">
-                        {{ i18n.trans("company") }}
-                        <select name="idempresa" class="form-control">
-                            {% for empresa in fsc.empresa.all() %}
-                                <option value="{{ empresa.idempresa }}">
-                                    {{ empresa.nombre }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
+                    {{ trans("company") }}
+                    <select name="idempresa" class="form-control mb-3">
+                        {% for empresa in fsc.empresa.all() %}
+                            <option value="{{ empresa.idempresa }}">{{ empresa.nombre }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <div class="col-sm-2">
-                    <div class="form-group">
-                        {{ i18n.trans("date") }}
-                        <input type="date" class="form-control" name="fecha" value="{{ 'now' | date('Y-m-d') }}"
-                               required="">
-                    </div>
+                    {{ trans("date") }}
+                    <input type="date" class="form-control mb-3" name="fecha" value="{{ 'now' | date('Y-m-d') }}"
+                           required>
                 </div>
                 <div class="col-sm-2">
-                    <div class="form-group">
-                        {{ i18n.trans("channel") }}
-                        <input type="number" class="form-control" name="channel" value=""/>
-                    </div>
+                    {{ trans("channel") }}
+                    <input type="number" class="form-control mb-3" name="channel" value=""/>
                 </div>
                 {% for variable in fsc.views.EditAsientoPredefinidoVariable.cursor %}
-                    <div class="col-sm-4">
-                        <div class="form-group">
-                            {{ variable.mensaje }}
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text">{{ variable.codigo }}</span>
-                                </div>
-                                <input type="number" value="0" step="any" class="form-control"
-                                       name="var_{{ variable.codigo }}" required="">
+                    <div class="col-sm-3">
+                        {{ variable.mensaje }}
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">{{ variable.codigo }}</span>
                             </div>
+                            <input type="number" value="0" step="any" class="form-control"
+                                   name="var_{{ variable.codigo }}" required>
                         </div>
                     </div>
                 {% endfor %}
             </div>
-            <div class="text-right">
-                <button type="submit" class="btn btn-success" name="action" value="gen-accounting">
-                    {{ i18n.trans("generate") }}
-                </button>
-            </div>
+        </div>
+        <div class="card-footer text-right p-2">
+            <button type="submit" class="btn btn-success" name="action" value="gen-accounting">
+                {{ trans("generate") }}
+            </button>
         </div>
     </div>
 </form>

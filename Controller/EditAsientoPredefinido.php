@@ -23,8 +23,8 @@ use FacturaScripts\Core\Base\DataBase\DataBaseWhere;
 use FacturaScripts\Core\Lib\ExtendedController\EditController;
 
 /**
- * @author Carlos García Gómez <carlos@facturascripts.com>
- * @author Daniel Fernández Giménez <hola@danielfg.es>
+ * @author Carlos García Gómez            <carlos@facturascripts.com>
+ * @author Daniel Fernández Giménez       <hola@danielfg.es>
  * @author Jeronimo Pedro Sánchez Manzano <socger@gmail.com>
  */
 class EditAsientoPredefinido extends EditController
@@ -56,7 +56,7 @@ class EditAsientoPredefinido extends EditController
 
     protected function createViewsGenerar(string $viewName = 'Generar'): void
     {
-        $this->addHtmlView($viewName, 'AsientoPredefinidoGenerar', 'AsientoPredefinido', 'generate', 'fas fa-magic');
+        $this->addHtmlView($viewName, 'AsientoPredefinidoGenerar', 'AsientoPredefinido', 'generate', 'fa-solid fa-wand-magic-sparkles');
     }
 
     protected function createViewsInfo(string $viewName = 'Info'): void
