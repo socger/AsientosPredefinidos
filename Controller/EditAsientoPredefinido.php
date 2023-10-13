@@ -1,8 +1,8 @@
 <?php
 /**
  * This file is part of AsientoPredefinido plugin for FacturaScripts
- * Copyright (C) 2021-2023 Carlos Garcia Gomez            <carlos@facturascripts.com>
- *                         Jeronimo Pedro Sánchez Manzano <socger@gmail.com>
+ * Copyright (C) 2021-2023 Carlos Garcia Gomez <carlos@facturascripts.com>
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
@@ -22,6 +22,11 @@ namespace FacturaScripts\Plugins\AsientosPredefinidos\Controller;
 use FacturaScripts\Core\Base\DataBase\DataBaseWhere;
 use FacturaScripts\Core\Lib\ExtendedController\EditController;
 
+/**
+ * @author Carlos García Gómez <carlos@facturascripts.com>
+ * @author Daniel Fernández Giménez <hola@danielfg.es>
+ * @author Jeronimo Pedro Sánchez Manzano <socger@gmail.com>
+ */
 class EditAsientoPredefinido extends EditController
 {
     public function getModelClassName(): string
@@ -83,9 +88,14 @@ class EditAsientoPredefinido extends EditController
 
     protected function generateAccountingAction(): void
     {
-        $form = $this->request->request->all(); // Nos traemos todos los campos del form de la vista AsientoPredefinidoGenerar.html.twig
-        if (empty($form["fecha"]) || empty($form["idempresa"])) {
-            $this->toolBox()->i18nLog()->warning('No ha introducido ni la empresa, ni la fecha');
+        $form = $this->request->request->all();
+        if (false === $this->validateFormToken()) {
+            return;
+        } elseif (empty($form["idempresa"])) {
+            $this->toolBox()->i18nLog()->warning('required-field', ['%field%' => $this->toolBox()->i18n()->trans('company')]);
+            return;
+        } elseif (empty($form["fecha"])) {
+            $this->toolBox()->i18nLog()->warning('required-field', ['%field%' => $this->toolBox()->i18n()->trans('date')]);
             return;
         }
 

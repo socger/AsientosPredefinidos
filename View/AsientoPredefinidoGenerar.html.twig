@@ -1,14 +1,8 @@
 <form action="{{ fsc.getModel().url() }}&activetab=Generar" method="post">
+    {{ formToken() }}
     <div class="card shadow mb-5">
         <div class="card-body">
             <div class="form-row">
-                <div class="col-sm-2">
-                    <div class="form-group">
-                        {{ i18n.trans("date") }}
-                        <input type="date" class="form-control" name="fecha" value="{{ 'now' | date('Y-m-d') }}"
-                               required="">
-                    </div>
-                </div>
                 <div class="col-sm-2">
                     <div class="form-group">
                         {{ i18n.trans("company") }}
@@ -19,6 +13,19 @@
                                 </option>
                             {% endfor %}
                         </select>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        {{ i18n.trans("date") }}
+                        <input type="date" class="form-control" name="fecha" value="{{ 'now' | date('Y-m-d') }}"
+                               required="">
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        {{ i18n.trans("channel") }}
+                        <input type="number" class="form-control" name="channel" value=""/>
                     </div>
                 </div>
                 {% for variable in fsc.views.EditAsientoPredefinidoVariable.cursor %}
