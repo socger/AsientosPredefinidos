@@ -26,13 +26,12 @@ use FacturaScripts\Dinamic\Model\Asiento;
 use FacturaScripts\Plugins\AsientosPredefinidos\Lib\AsientoPredefinidoGenerator;
 
 /**
- * @author Carlos García Gómez <carlos@facturascripts.com>
- * @author Daniel Fernández Giménez <hola@danielfg.es>
+ * @author Carlos García Gómez            <carlos@facturascripts.com>
+ * @author Daniel Fernández Giménez       <hola@danielfg.es>
  * @author Jeronimo Pedro Sánchez Manzano <socger@gmail.com>
  */
 class AsientoPredefinido extends ModelClass
 {
-
     use ModelTrait;
 
     /** @var string */

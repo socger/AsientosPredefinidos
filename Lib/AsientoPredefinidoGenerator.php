@@ -31,8 +31,8 @@ use FacturaScripts\Plugins\AsientosPredefinidos\Model\AsientoPredefinidoVariable
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 /**
- * @author Carlos García Gómez <carlos@facturascripts.com>
- * @author Daniel Fernández Giménez <hola@danielfg.es>
+ * @author Carlos García Gómez            <carlos@facturascripts.com>
+ * @author Daniel Fernández Giménez       <hola@danielfg.es>
  * @author Jeronimo Pedro Sánchez Manzano <socger@gmail.com>
  */
 class AsientoPredefinidoGenerator
@@ -55,7 +55,7 @@ class AsientoPredefinidoGenerator
         $asiento->idempresa = (int)$form["idempresa"];
         $asiento->setDate($form["fecha"]);
         $asiento->concepto = CodePatterns::trans($predefinido->concepto, $asiento);
-        $asiento->canal = $form["channel"] ?? null;
+        $asiento->canal = $form["canal"] ?? null;
         if (false === $asiento->save()) {
             ToolBox::i18nLog()->warning('no-can-create-accounting-entry');
             $database->rollback();

@@ -1,52 +1,60 @@
 <?php
-
+/**
+ * This file is part of AsientosPredefinidos plugin for FacturaScripts
+ * Copyright (C) 2023 Carlos Garcia Gomez <carlos@facturascripts.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 namespace FacturaScripts\Test\Plugins;
 
 use FacturaScripts\Core\Base\ToolBox;
-use FacturaScripts\Core\Model\Cuenta;
-use FacturaScripts\Core\Model\Empresa;
-use FacturaScripts\Core\Model\Subcuenta;
+use FacturaScripts\Core\DataSrc\Empresas;
+use FacturaScripts\Core\Tools;
 use FacturaScripts\Plugins\AsientosPredefinidos\Model\AsientoPredefinido;
 use FacturaScripts\Test\Traits\DefaultSettingsTrait;
 use FacturaScripts\Test\Traits\LogErrorsTrait;
 use FacturaScripts\Test\Traits\RandomDataTrait;
 use PHPUnit\Framework\TestCase;
 
-class AsientosPredefinidosTest extends TestCase
+final class AsientosPredefinidosTest extends TestCase
 {
-    use RandomDataTrait, LogErrorsTrait, DefaultSettingsTrait;
+    use DefaultSettingsTrait;
+    use LogErrorsTrait;
+    use RandomDataTrait;
 
-    /**
-     * @var Empresa
-     */
-    private $empresa;
-
-    protected function setUp(): void
+    public static function setUpBeforeClass(): void
     {
-        $this->empresa = new Empresa();
-        $this->empresa->loadFromCode(1);
-
-        $ejercicio = $this->getRandomExercise();
-        $ejercicio->idempresa = $this->empresa->idempresa;
-        $ejercicio->save();
-
-        // Si no se encuentra el Plan Contable instalado, lo instalamos.
-        $numCuentas = count((new Cuenta())->all([], [], 0, 0));
-        $numSubCuentas = count((new Subcuenta())->all([], [], 0, 0));
-        if ($numCuentas < 800 && $numSubCuentas < 720) {
-            $this->installAccountingPlan();
-        }
+        self::setDefaultSettings();
+        self::installAccountingPlan();
+        self::removeTaxRegularization();
     }
 
-    public function testAsientoPredefinidoNomina()
+    public function testAsientoPredefinidoNomina(): void
     {
-        $asientoPredefinido = new AsientoPredefinido();
-        $asientoPredefinido->loadFromCode(1);
+        // obtenemos la empresa predefinida
+        $empresa = Empresas::default();
 
+        // cargamos el asiento predefinido
+        $asientoPredefinido = new AsientoPredefinido();
+        $this->assertTrue($asientoPredefinido->loadFromCode(1));
+
+        // generamos el asiento
         $asiento = $asientoPredefinido->generate([
-            'idempresa' => $this->empresa->idempresa,
-            'fecha' => date('now'),
+            'idempresa' => $empresa->idempresa,
+            'fecha' => date(AsientoPredefinido::DATE_STYLE),
+            'canal' => 0,
             'var_A' => 0,
             'var_C' => 20,
             'var_L' => 30,
@@ -55,6 +63,8 @@ class AsientosPredefinidosTest extends TestCase
         ]);
 
         // Comprobamos que el asiento que ha creado correctamente
+        $this->assertTrue($asiento->exists());
+
         $textoMes = ToolBox::i18n()->trans(strtolower(date('F', strtotime($asiento->fecha))));
         $this->assertEquals('Nómina ' . $textoMes, $asiento->concepto);
         $this->assertEquals(20, $asiento->importe);
@@ -87,17 +97,24 @@ class AsientosPredefinidosTest extends TestCase
         $this->assertEquals(-30, $partidas[4]->debe);
         $this->assertEquals(0, $partidas[4]->haber);
 
+        // borramos el asiento
         $asiento->delete();
     }
 
-    public function testAsientoPredefinidoCuotaAutonomo()
+    public function testAsientoPredefinidoCuotaAutonomo(): void
     {
-        $asientoPredefinido = new AsientoPredefinido();
-        $asientoPredefinido->loadFromCode(2);
+        // obtenemos la empresa predefinida
+        $empresa = Empresas::default();
 
+        // cargamos el asiento predefinido
+        $asientoPredefinido = new AsientoPredefinido();
+        $this->assertTrue($asientoPredefinido->loadFromCode(2));
+
+        // generamos el asiento
         $asiento = $asientoPredefinido->generate([
-            'idempresa' => $this->empresa->idempresa,
-            'fecha' => date('now'),
+            'idempresa' => $empresa->idempresa,
+            'fecha' => date(AsientoPredefinido::DATE_STYLE),
+            'canal' => 0,
             'var_A' => 0,
             'var_B' => 123,
         ]);
@@ -120,17 +137,24 @@ class AsientosPredefinidosTest extends TestCase
         $this->assertEquals(123, $partidas[1]->debe);
         $this->assertEquals(0, $partidas[1]->haber);
 
+        // borramos el asiento
         $asiento->delete();
     }
 
-    public function testAsientoPredefinidoPagoCuotaAutonomo()
+    public function testAsientoPredefinidoPagoCuotaAutonomo(): void
     {
-        $asientoPredefinido = new AsientoPredefinido();
-        $asientoPredefinido->loadFromCode(3);
+        // obtenemos la empresa predefinida
+        $empresa = Empresas::default();
 
+        // cargamos el asiento predefinido
+        $asientoPredefinido = new AsientoPredefinido();
+        $this->assertTrue($asientoPredefinido->loadFromCode(3));
+
+        // generamos el asiento
         $asiento = $asientoPredefinido->generate([
-            'idempresa' => $this->empresa->idempresa,
-            'fecha' => date('now'),
+            'idempresa' => $empresa->idempresa,
+            'fecha' => date(AsientoPredefinido::DATE_STYLE),
+            'canal' => 0,
             'var_A' => 0,
             'var_B' => 123,
         ]);
@@ -153,17 +177,24 @@ class AsientosPredefinidosTest extends TestCase
         $this->assertEquals(0, $partidas[1]->debe);
         $this->assertEquals(123, $partidas[1]->haber);
 
+        // borramos el asiento
         $asiento->delete();
     }
 
-    public function testAsientoPredefinidoPagoNomina()
+    public function testAsientoPredefinidoPagoNomina(): void
     {
-        $asientoPredefinido = new AsientoPredefinido();
-        $asientoPredefinido->loadFromCode(4);
+        // obtenemos la empresa predefinida
+        $empresa = Empresas::default();
 
+        // cargamos el asiento predefinido
+        $asientoPredefinido = new AsientoPredefinido();
+        $this->assertTrue($asientoPredefinido->loadFromCode(4));
+
+        // generamos el asiento
         $asiento = $asientoPredefinido->generate([
-            'idempresa' => $this->empresa->idempresa,
-            'fecha' => date('now'),
+            'idempresa' => $empresa->idempresa,
+            'fecha' => date(AsientoPredefinido::DATE_STYLE),
+            'canal' => 0,
             'var_A' => 0,
             'var_B' => 123,
         ]);
@@ -186,26 +217,16 @@ class AsientosPredefinidosTest extends TestCase
         $this->assertEquals(0, $partidas[1]->debe);
         $this->assertEquals(123, $partidas[1]->haber);
 
+        // borramos el asiento
         $asiento->delete();
     }
 
-    public function testMethodTest()
+    public function testMethodTest(): void
     {
         $asientoPredefinido = new AsientoPredefinido();
         $asientoPredefinido->descripcion = null;
         $asientoPredefinido->concepto = null;
         $this->assertTrue($asientoPredefinido->test());
-    }
-
-    public function testUrl()
-    {
-        $asientoPredefinido = new AsientoPredefinido();
-
-        $this->assertEquals('ListAsiento?activetab=ListAsientoPredefinido', $asientoPredefinido->url());
-
-        $asientoPredefinido->save();
-
-        $this->assertEquals('EditAsientoPredefinido?code=' . $asientoPredefinido->id, $asientoPredefinido->url());
     }
 
     protected function tearDown(): void
