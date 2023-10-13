@@ -6,8 +6,12 @@
                 <div class="col-sm-2">
                     {{ trans("company") }}
                     <select name="idempresa" class="form-control mb-3">
-                        {% for empresa in fsc.empresa.all() %}
-                            <option value="{{ empresa.idempresa }}">{{ empresa.nombre }}</option>
+                        {% for empresa in fsc.empresa.all({}, {'nombre': 'ASC'}) %}
+                            {% if empresa.idempresa == settings('default', 'idempresa') %}
+                                <option value="{{ empresa.idempresa }}" selected>{{ empresa.nombre }}</option>
+                            {% else %}
+                                <option value="{{ empresa.idempresa }}">{{ empresa.nombre }}</option>
+                            {% endif %}
                         {% endfor %}
                     </select>
                 </div>
