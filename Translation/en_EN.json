@@ -1,5 +1,5 @@
 {
     "predefined-acc-entries": "Predefined seats",
     "predefined-acc-entry": "Predefined seat",
-    "required-field": "Campo %field% obligatorio"
+    "required-field": "Mandatory %field% field"
 }
